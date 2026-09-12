@@ -1,7 +1,6 @@
-// lib/pages/auth/login_page.dart
-
 import 'package:flutter/material.dart';
-
+import 'package:mobile/pages/auth/register_page.dart';
+import 'package:mobile/pages/posts/posts_page.dart';
 import '../../services/auth.service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -38,6 +37,13 @@ class _LoginPageState extends State<LoginPage> {
     });
     try {
       await AuthService.login(email, password);
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const PostsPage()),
+      );
+
       showMessage('Login berhasil');
     } catch (e) {
       showMessage(e.toString());
