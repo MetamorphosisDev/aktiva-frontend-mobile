@@ -1,6 +1,8 @@
+// lib/pages/auth/login_page.dart
+
 import 'package:flutter/material.dart';
+
 import '../../services/auth.service.dart';
-import '../../services/token_storage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,7 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
-  bool obscurePassword = true;
+  bool hidePassword = true;
 
   @override
   void dispose() {
@@ -23,49 +25,32 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> handleLogin() async {
+  Future<void> login() async {
+    // BACKEND
     final email = emailController.text.trim();
     final password = passwordController.text;
-
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email dan password wajib diisi')),
-      );
+      showMessage('Email dan password wajib diisi');
       return;
     }
-
     setState(() {
       isLoading = true;
     });
-
     try {
       await AuthService.login(email, password);
-
-      final token = await TokenStorage.getToken();
-
-      print('JWT BERHASIL DISIMPAN');
-      print('TOKEN ADA: ${token}');
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Login berhasil')));
+      showMessage('Login berhasil');
     } catch (e) {
-      print('LOGIN ERROR: $e');
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      showMessage(e.toString());
     }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -76,22 +61,15 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Login',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
 
-              const SizedBox(height: 8),
-
-              const Text(
-                'Masuk ke akun kamu',
-                style: TextStyle(color: Colors.grey),
-              ),
-
               const SizedBox(height: 32),
 
+              // Email
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -103,20 +81,21 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 16),
 
+              // Password
               TextField(
                 controller: passwordController,
-                obscureText: obscurePassword,
+                obscureText: hidePassword,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
-                        obscurePassword = !obscurePassword;
+                        hidePassword = !hidePassword;
                       });
                     },
                     icon: Icon(
-                      obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      hidePassword ? Icons.visibility_off : Icons.visibility,
                     ),
                   ),
                 ),
@@ -124,11 +103,12 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 24),
 
+              // Tombol Login
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : handleLogin,
+                  onPressed: isLoading ? null : login,
                   child: isLoading
                       ? const CircularProgressIndicator()
                       : const Text('Login'),
