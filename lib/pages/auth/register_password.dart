@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/pages/auth/login_page.dart';
-import 'package:mobile/pages/auth/register_password.dart';
+import '../../services/auth.service.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class RegisterPasswordPage extends StatefulWidget {
+  final String nama;
+  final String email;
+  final String nomorTelepon;
+
+  const RegisterPasswordPage({
+    super.key,
+    required this.nama,
+    required this.email,
+    required this.nomorTelepon,
+  });
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterPasswordPage> createState() => _RegisterPasswordPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  final namaController = TextEditingController();
-  final emailController = TextEditingController();
-  final nomorTeleponController = TextEditingController();
+class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  bool isLoading = false;
+  bool hidePassword = true;
 
   @override
   void dispose() {
-    namaController.dispose();
-    emailController.dispose();
-    nomorTeleponController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -28,24 +38,77 @@ class _RegisterPageState extends State<RegisterPage> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void lanjutRegister() {
-    final nama = namaController.text.trim();
-    final email = emailController.text.trim();
-    final nomorTelepon = nomorTeleponController.text.trim();
+  Future<void> register() async {
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
 
-    if (nama.isEmpty || email.isEmpty || nomorTelepon.isEmpty) {
+    if (password.isEmpty || confirmPassword.isEmpty) {
       showMessage('Semua data wajib diisi');
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RegisterPasswordPage(
-          nama: nama,
-          email: email,
-          nomorTelepon: nomorTelepon,
+    if (password.length < 8) {
+      showMessage('Password minimal 8 karakter');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      showMessage('Konfirmasi password tidak cocok');
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await AuthService.register(
+        widget.nama,
+        widget.email,
+        password,
+        widget.nomorTelepon,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      showMessage(e.toString());
+
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  InputDecoration inputDecoration({
+    required String hintText,
+    required VoidCallback onToggle,
+    required bool hidden,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      filled: true,
+      fillColor: const Color(0xFFEEEEEC),
+      suffixIcon: IconButton(
+        onPressed: onToggle,
+        icon: Icon(
+          hidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+          size: 18,
         ),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
       ),
     );
   }
@@ -73,7 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 28),
 
                 const Text(
-                  'Create account',
+                  'Create password',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
@@ -84,8 +147,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 8),
 
                 const Text(
-                  'Join a thoughtful community of readers\n'
-                  'and creators.',
+                  'Create a strong password to keep\nyour account secure.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -96,11 +158,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 30),
 
-                // NAMA
+                // PASSWORD
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Full name',
+                    'Password',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -110,33 +172,29 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 7),
-
                 TextField(
-                  controller: namaController,
+                  controller: passwordController,
+                  obscureText: hidePassword,
                   style: const TextStyle(fontSize: 13),
                   textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    hintText: 'Nama lengkap',
-                    filled: true,
-                    fillColor: const Color(0xFFEEEEEC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
+                  decoration: inputDecoration(
+                    hintText: '••••••••',
+                    hidden: hidePassword,
+                    onToggle: () {
+                      setState(() {
+                        hidePassword = !hidePassword;
+                      });
+                    },
                   ),
                 ),
 
                 const SizedBox(height: 16),
 
-                // EMAIL
+                // CONFIRM PASSWORD
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Email',
+                    'Confirm password',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -148,49 +206,17 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 7),
 
                 TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(fontSize: 13),
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    hintText: 'email@aktiva.co',
-                    filled: true,
-                    fillColor: const Color(0xFFEEEEEC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // NOMOR TELEPON
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Phone number',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF404040),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 7),
-
-                TextField(
-                  controller: nomorTeleponController,
-                  keyboardType: TextInputType.phone,
+                  controller: confirmPasswordController,
+                  obscureText: true,
                   style: const TextStyle(fontSize: 13),
                   textInputAction: TextInputAction.done,
+                  onSubmitted: (_) {
+                    if (!isLoading) {
+                      register();
+                    }
+                  },
                   decoration: InputDecoration(
-                    hintText: '08xxxxxxxxxx',
+                    hintText: '••••••••',
                     filled: true,
                     fillColor: const Color(0xFFEEEEEC),
                     border: OutlineInputBorder(
@@ -206,12 +232,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 24),
 
-                // NEXT BUTTON
+                // REGISTER BUTTON
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: lanjutRegister,
+                    onPressed: isLoading ? null : register,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF171717),
                       foregroundColor: const Color(0xFFF7F7F5),
@@ -220,19 +246,28 @@ class _RegisterPageState extends State<RegisterPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      'Continue',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFFF7F7F5),
+                            ),
+                          )
+                        : const Text(
+                            'Create account',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                   ),
                 ),
 
                 const SizedBox(height: 18),
 
-                // LOGIN
+                // BACK TO LOGIN
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -241,14 +276,16 @@ class _RegisterPageState extends State<RegisterPage> {
                       style: TextStyle(fontSize: 11, color: Color(0xFF737373)),
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
-                      },
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginPage(),
+                                ),
+                              );
+                            },
                       child: const Text(
                         'Login',
                         style: TextStyle(
