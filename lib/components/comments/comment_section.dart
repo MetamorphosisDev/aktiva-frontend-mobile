@@ -35,10 +35,11 @@ class _CommentSectionState extends State<CommentSection> {
     super.dispose();
   }
 
-  // GET COMMENTS
   Future<void> getComments() async {
     try {
       final data = await ApiService.getComments(widget.postId);
+
+      if (!mounted) return;
 
       setState(() {
         comments = data;
@@ -47,27 +48,24 @@ class _CommentSectionState extends State<CommentSection> {
     } catch (e) {
       print(e);
 
+      if (!mounted) return;
+
       setState(() {
         isLoading = false;
       });
     }
   }
 
-  // ADD COMMENT
   Future<void> addComment() async {
     final comment = commentController.text.trim();
 
     if (comment.isEmpty) return;
-
     try {
       await ApiService.createComment(widget.postId, comment);
-
       commentController.clear();
-
       await getComments();
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Komentar berhasil ditambahkan')),
       );
@@ -75,14 +73,12 @@ class _CommentSectionState extends State<CommentSection> {
       print(e);
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gagal menambahkan komentar')),
       );
     }
   }
 
-  // DELETE COMMENT
   Future<void> deleteComment(int commentId) async {
     try {
       await ApiService.deleteComment(commentId);
@@ -117,7 +113,6 @@ class _CommentSectionState extends State<CommentSection> {
 
         const SizedBox(height: 16),
 
-        // INPUT COMMENT
         Row(
           children: [
             Expanded(
@@ -138,7 +133,6 @@ class _CommentSectionState extends State<CommentSection> {
 
         const SizedBox(height: 20),
 
-        // LIST COMMENT
         if (isLoading)
           const Center(child: CircularProgressIndicator())
         else if (comments.isEmpty)

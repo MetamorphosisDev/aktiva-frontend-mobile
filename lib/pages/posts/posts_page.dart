@@ -275,9 +275,6 @@ class _PostsPageState extends State<PostsPage> {
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: const Color(0xFFE5E5E5),
-                                    ),
                                   ),
                                   child: Column(
                                     crossAxisAlignment:

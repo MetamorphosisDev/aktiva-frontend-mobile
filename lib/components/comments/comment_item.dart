@@ -3,73 +3,59 @@ import 'package:flutter/material.dart';
 class CommentItem extends StatelessWidget {
   final dynamic comment;
   final bool isMyComment;
-  final VoidCallback? onDelete;
+  final VoidCallback onDelete;
 
   const CommentItem({
     super.key,
     required this.comment,
     required this.isMyComment,
-    this.onDelete,
+    required this.onDelete,
   });
 
-  String _formatDate(dynamic value) {
-    if (value == null) return '';
+  String getDate() {
+    final createdAt = comment['createdAt'];
 
-    final date = DateTime.tryParse(value.toString());
+    if (createdAt == null) return '';
+
+    final date = DateTime.tryParse(createdAt.toString())?.toLocal();
 
     if (date == null) return '';
 
-    return '${date.day}/${date.month}/${date.year}';
+    return '${date.day}/${date.month}/${date.year} '
+        '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
-        borderRadius: BorderRadius.circular(14),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(
-            radius: 18,
-            backgroundColor: Color(0xFFEAEAEA),
-            child: Icon(Icons.person_outline, size: 18, color: Colors.black54),
-          ),
-
-          const SizedBox(width: 10),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   comment['userName'] ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
 
-                const SizedBox(height: 5),
+                const SizedBox(height: 4),
+
+                Text(comment['comment'] ?? ''),
+
+                const SizedBox(height: 4),
 
                 Text(
-                  comment['comment'] ?? '',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.5,
-                    color: Colors.black87,
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                Text(
-                  _formatDate(comment['createdAt']),
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  getDate(),
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ],
             ),
@@ -78,7 +64,7 @@ class CommentItem extends StatelessWidget {
           if (isMyComment)
             IconButton(
               onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline, size: 18),
+              icon: const Icon(Icons.delete_outline),
             ),
         ],
       ),
