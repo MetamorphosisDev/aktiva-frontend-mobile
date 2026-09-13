@@ -22,7 +22,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
   bool isBookmarked = false;
   bool isBookmarkLoading = false;
 
-  // USER LOGIN
   int? currentUserId;
 
   @override
@@ -32,8 +31,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     getCurrentUser();
     getPostDetail();
   }
-
-  // ================= USER LOGIN =================
 
   Future<void> getCurrentUser() async {
     try {
@@ -55,11 +52,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
         currentUserId = payload['id'];
       });
     } catch (e) {
-      print('Gagal mengambil user ID: $e');
+      print(e);
     }
   }
-
-  // ================= GET POST =================
 
   Future<void> getPostDetail() async {
     try {
@@ -84,8 +79,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
-  // ================= CHECK BOOKMARK =================
-
   Future<void> checkBookmark() async {
     try {
       final bookmarks = await ApiService.getBookmarks();
@@ -105,8 +98,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
       print(e);
     }
   }
-
-  // ================= TOGGLE BOOKMARK =================
 
   Future<void> toggleBookmark() async {
     if (isBookmarkLoading) return;
@@ -143,8 +134,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
-  // ================= BUILD =================
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -165,13 +154,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
       backgroundColor: const Color(0xFFF8F8F8),
       body: CustomScrollView(
         slivers: [
-          // ================= COVER =================
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
             backgroundColor: Colors.white,
             elevation: 0,
-
             leading: Padding(
               padding: const EdgeInsets.all(8),
               child: CircleAvatar(
@@ -189,7 +176,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 ),
               ),
             ),
-
             actions: [
               Padding(
                 padding: const EdgeInsets.all(8),
@@ -214,11 +200,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 ),
               ),
             ],
-
             flexibleSpace: FlexibleSpaceBar(background: _buildCover()),
           ),
 
-          // ================= CONTENT =================
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.fromLTRB(24, 26, 24, 45),
@@ -232,7 +216,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ================= CATEGORY =================
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -255,7 +238,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 16),
 
-                  // ================= TITLE =================
                   Text(
                     post!['title'] ?? '',
                     style: const TextStyle(
@@ -268,7 +250,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 18),
 
-                  // ================= AUTHOR =================
                   Row(
                     children: [
                       const CircleAvatar(
@@ -280,9 +261,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                           color: Colors.black54,
                         ),
                       ),
-
                       const SizedBox(width: 10),
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -294,9 +273,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                               color: Colors.black,
                             ),
                           ),
-
                           const SizedBox(height: 2),
-
                           Text(
                             _getDate(),
                             style: const TextStyle(
@@ -311,7 +288,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 28),
 
-                  // ================= SUMMARY =================
                   if (_hasText(post!['summary']))
                     Container(
                       padding: const EdgeInsets.only(left: 16),
@@ -333,7 +309,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 30),
 
-                  // ================= CONTENT =================
                   if (_hasText(post!['content']))
                     Text(
                       post!['content'],
@@ -346,16 +321,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 32),
 
-                  // ================= INFORMATION =================
                   if (_hasText(post!['location']) || _hasText(post!['source']))
                     _buildInformation(),
 
-                  // ================= GALLERY =================
                   ..._buildGallery(),
 
                   const SizedBox(height: 30),
 
-                  // ================= COMMENTS =================
                   CommentSection(
                     postId: widget.id,
                     currentUserId: currentUserId,
@@ -368,8 +340,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
       ),
     );
   }
-
-  // ================= COVER =================
 
   Widget _buildCover() {
     if (!_hasImage(post!['coverImage'])) {
@@ -398,7 +368,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
             );
           },
         ),
-
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -414,8 +383,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
       ],
     );
   }
-
-  // ================= INFORMATION =================
 
   Widget _buildInformation() {
     return Column(
@@ -479,8 +446,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  // ================= GALLERY =================
-
   List<Widget> _buildGallery() {
     final data = post!['images'];
 
@@ -534,8 +499,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     ];
   }
 
-  // ================= IMAGE ERROR =================
-
   Widget _imageError() {
     return Container(
       width: double.infinity,
@@ -544,8 +507,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
       child: const Icon(Icons.image_outlined, size: 30, color: Colors.grey),
     );
   }
-
-  // ================= HELPERS =================
 
   bool _hasText(dynamic value) {
     return value != null && value.toString().trim().isNotEmpty;
@@ -557,13 +518,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   String _getDate() {
     final createdAt = post!['createdAt'];
-
     if (createdAt == null) return '';
-
     final date = DateTime.tryParse(createdAt.toString());
-
     if (date == null) return '';
-
     return '${date.day}/${date.month}/${date.year}';
   }
 }
