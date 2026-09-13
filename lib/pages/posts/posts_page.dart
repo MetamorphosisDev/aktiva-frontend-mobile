@@ -10,20 +10,24 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
+  // Semua data dari API
   List<dynamic> posts = [];
+
+  // Data yang sudah di-search / filter
   List<dynamic> filteredPosts = [];
 
   bool isLoading = true;
 
   final TextEditingController searchController = TextEditingController();
 
-  final List<String> categories = ['All', 'Teknologi', 'Culture', 'Work'];
+  final List<String> categories = ['Semua', 'Teknologi', 'Pertanian', 'Work'];
 
-  String selectedCategory = 'All';
+  String selectedCategory = 'Semua';
 
   @override
   void initState() {
     super.initState();
+
     getPosts();
 
     searchController.addListener(() {
@@ -37,7 +41,9 @@ class _PostsPageState extends State<PostsPage> {
 
       setState(() {
         posts = data;
+
         filteredPosts = data;
+
         isLoading = false;
       });
     } catch (e) {
@@ -54,18 +60,21 @@ class _PostsPageState extends State<PostsPage> {
 
     List<dynamic> result = [];
 
+    // Cek semua post satu per satu
     for (var post in posts) {
       String title = post['title'] ?? '';
       String summary = post['summary'] ?? '';
       String category = post['category'] ?? '';
 
+      // SEARCH
       bool searchMatch =
           title.toLowerCase().contains(search) ||
           summary.toLowerCase().contains(search) ||
           category.toLowerCase().contains(search);
 
+      // CATEGORY
       bool categoryMatch =
-          selectedCategory == 'All' ||
+          selectedCategory == 'Semua' ||
           category.toLowerCase() == selectedCategory.toLowerCase();
 
       if (searchMatch && categoryMatch) {
@@ -73,6 +82,7 @@ class _PostsPageState extends State<PostsPage> {
       }
     }
 
+    // Tampilkan hasil filter
     setState(() {
       filteredPosts = result;
     });
@@ -283,9 +293,7 @@ class _PostsPageState extends State<PostsPage> {
 
                                 // CATEGORY
                                 Text(
-                                  (post['category'] ?? 'POST')
-                                      .toString()
-                                      .toUpperCase(),
+                                  (post['category'] ?? 'POST').toString(),
                                   style: const TextStyle(
                                     fontSize: 8,
                                     fontWeight: FontWeight.w500,
@@ -294,18 +302,21 @@ class _PostsPageState extends State<PostsPage> {
                                   ),
                                 ),
 
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 6),
 
                                 // TITLE
-                                Text(
-                                  post['title'] ?? '',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.1,
-                                    color: Colors.black,
+                                SizedBox(
+                                  height: 32,
+                                  child: Text(
+                                    post['title'] ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.2,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
 
@@ -325,15 +336,45 @@ class _PostsPageState extends State<PostsPage> {
 
                                 const SizedBox(height: 5),
 
-                                // AUTHOR + DATE
-                                Text(
-                                  _postMeta(post),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 8,
-                                    color: Colors.grey,
-                                  ),
+                                // AUTHOR AND DATE
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.person_outline,
+                                      size: 11,
+                                      color: Colors.grey,
+                                    ),
+
+                                    const SizedBox(width: 3),
+
+                                    Text(
+                                      post['author'] ?? 'Unknown',
+                                      style: const TextStyle(
+                                        fontSize: 8,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 8),
+
+                                    const Icon(
+                                      Icons.calendar_today_outlined,
+                                      size: 10,
+                                      color: Colors.grey,
+                                    ),
+
+                                    const SizedBox(width: 3),
+
+                                    Text(
+                                      '${DateTime.parse(post['createdAt'].toString()).day}/'
+                                      '${DateTime.parse(post['createdAt'].toString()).month}/'
+                                      '${DateTime.parse(post['createdAt'].toString()).year}',
+                                      style: const TextStyle(
+                                        fontSize: 8,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             );
@@ -346,21 +387,8 @@ class _PostsPageState extends State<PostsPage> {
   }
 
   String _postMeta(dynamic post) {
-    final author = post['author'] ?? post['authorName'];
-    final date = post['createdAt'] ?? post['date'];
-
-    if (author != null && date != null) {
-      return '$author · $date';
-    }
-
-    if (author != null) {
-      return author.toString();
-    }
-
-    if (date != null) {
-      return date.toString();
-    }
-
-    return '';
+    final author = post['author'];
+    final date = DateTime.parse(post['createdAt'].toString());
+    return '$author · ${date.day}/${date.month}/${date.year}';
   }
 }
