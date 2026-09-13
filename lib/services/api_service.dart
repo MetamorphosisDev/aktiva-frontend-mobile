@@ -43,4 +43,36 @@ class ApiService {
   static Future<List<dynamic>> getBookmarks() async {
     return await get('/bookmarks');
   }
+
+  // CREATE BOOKMARK
+  static Future<dynamic> createBookmark(int postId) async {
+    final token = await getToken();
+
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/bookmarks/$postId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    }
+
+    throw Exception('Gagal menambahkan bookmark');
+  }
+
+  // DELETE BOOKMARK
+  static Future<dynamic> deleteBookmark(int postId) async {
+    final token = await getToken();
+
+    final response = await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/bookmarks/$postId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    }
+
+    throw Exception('Gagal menghapus bookmark');
+  }
 }
