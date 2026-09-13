@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../services/api_service.dart';
-
 import '../../components/bottom_navbar.dart';
+import './post_detail_page.dart';
 
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
@@ -12,10 +12,7 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
-  // Semua data dari API
   List<dynamic> posts = [];
-
-  // Data yang sudah di-search / filter
   List<dynamic> filteredPosts = [];
 
   bool isLoading = true;
@@ -48,13 +45,13 @@ class _PostsPageState extends State<PostsPage> {
     try {
       final data = await ApiService.getPosts();
 
-      final publishedposts = data
+      final publishedPosts = data
           .where((post) => post['status'] == 'published')
           .toList();
 
       setState(() {
-        posts = publishedposts;
-        filteredPosts = publishedposts;
+        posts = publishedPosts;
+        filteredPosts = publishedPosts;
         isLoading = false;
       });
     } catch (e) {
@@ -67,36 +64,35 @@ class _PostsPageState extends State<PostsPage> {
   }
 
   void filterPosts() {
-    String search = searchController.text.toLowerCase();
+    final search = searchController.text.toLowerCase();
 
-    List<dynamic> result = [];
+    final result = posts.where((post) {
+      final title = post['title']?.toString().toLowerCase() ?? '';
+      final summary = post['summary']?.toString().toLowerCase() ?? '';
+      final category = post['category']?.toString().toLowerCase() ?? '';
 
-    // Cek semua post satu per satu
-    for (var post in posts) {
-      String title = post['title'] ?? '';
-      String summary = post['summary'] ?? '';
-      String category = post['category'] ?? '';
+      final searchMatch =
+          title.contains(search) ||
+          summary.contains(search) ||
+          category.contains(search);
 
-      // SEARCH
-      bool searchMatch =
-          title.toLowerCase().contains(search) ||
-          summary.toLowerCase().contains(search) ||
-          category.toLowerCase().contains(search);
-
-      // CATEGORY
-      bool categoryMatch =
+      final categoryMatch =
           selectedCategory == 'Semua' ||
-          category.toLowerCase() == selectedCategory.toLowerCase();
+          category == selectedCategory.toLowerCase();
 
-      if (searchMatch && categoryMatch) {
-        result.add(post);
-      }
-    }
+      return searchMatch && categoryMatch;
+    }).toList();
 
-    // Tampilkan hasil filter
     setState(() {
       filteredPosts = result;
     });
+  }
+
+  void openPostDetail(dynamic post) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PostDetailPage(id: post['id'])),
+    );
   }
 
   @override
@@ -271,42 +267,40 @@ class _PostsPageState extends State<PostsPage> {
                             itemBuilder: (context, index) {
                               final post = filteredPosts[index];
 
-                              return Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                    255,
-                                    255,
-                                    255,
-                                    255,
+                              return GestureDetector(
+                                onTap: () {
+                                  openPostDetail(post);
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: const Color(0xFFE5E5E5),
+                                    ),
                                   ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // IMAGE
-                                    if (post['coverImage'] != null)
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // IMAGE
                                       ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(10),
+                                            ),
                                         child: Image.network(
-                                          post['coverImage'],
+                                          post['coverImage'] ?? '',
+                                          height: 130,
                                           width: double.infinity,
-                                          height: 110,
                                           fit: BoxFit.cover,
                                           errorBuilder:
                                               (context, error, stackTrace) {
                                                 return Container(
+                                                  height: 130,
                                                   width: double.infinity,
-                                                  height: 110,
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(
-                                                      0xFFEAEAEA,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
+                                                  color: const Color(
+                                                    0xFFF1F1F1,
                                                   ),
                                                   child: const Icon(
                                                     Icons.image_outlined,
@@ -317,78 +311,86 @@ class _PostsPageState extends State<PostsPage> {
                                         ),
                                       ),
 
-                                    const SizedBox(height: 7),
+                                      // CONTENT
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                post['category']
+                                                        ?.toString()
+                                                        .toUpperCase() ??
+                                                    'POST',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.grey,
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
 
-                                    // CATEGORY
-                                    Text(
-                                      (post['category'] ?? 'POST').toString(),
-                                      style: const TextStyle(
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
+                                              const SizedBox(height: 5),
 
-                                    const SizedBox(height: 6),
+                                              Text(
+                                                post['title'] ?? '',
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.black,
+                                                  height: 1.2,
+                                                ),
+                                              ),
 
-                                    // TITLE
-                                    SizedBox(
-                                      height: 32,
-                                      child: Text(
-                                        post['title'] ?? '',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          height: 1.2,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
+                                              const SizedBox(height: 5),
 
-                                    const SizedBox(height: 8),
+                                              Text(
+                                                post['summary'] ?? '',
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 9,
+                                                  color: Colors.grey,
+                                                  height: 1.3,
+                                                ),
+                                              ),
 
-                                    // SUMMARY
-                                    Text(
-                                      post['summary'] ?? '',
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 9.5,
-                                        color: Colors.grey,
-                                        height: 1.3,
-                                      ),
-                                    ),
+                                              const Spacer(),
 
-                                    const SizedBox(height: 5),
-
-                                    // AUTHOR AND DATE
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.person_outline,
-                                          size: 11,
-                                          color: Colors.grey,
-                                        ),
-
-                                        const SizedBox(width: 3),
-
-                                        Expanded(
-                                          child: Text(
-                                            _postMeta(post),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 8,
-                                              color: Colors.grey,
-                                            ),
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.person_outline,
+                                                    size: 11,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  const SizedBox(width: 3),
+                                                  Expanded(
+                                                    child: Text(
+                                                      _postMeta(post),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 8,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },
@@ -397,13 +399,25 @@ class _PostsPageState extends State<PostsPage> {
                 ),
               ],
             ),
+
       bottomNavigationBar: const BottomNavbar(currentIndex: 0),
     );
   }
 
   String _postMeta(dynamic post) {
     final author = post['author'] ?? 'Unknown';
-    final date = DateTime.parse(post['createdAt'].toString());
+    final createdAt = post['createdAt'];
+
+    if (createdAt == null) {
+      return author.toString();
+    }
+
+    final date = DateTime.tryParse(createdAt.toString());
+
+    if (date == null) {
+      return author.toString();
+    }
+
     return '$author · ${date.day}/${date.month}/${date.year}';
   }
 }
