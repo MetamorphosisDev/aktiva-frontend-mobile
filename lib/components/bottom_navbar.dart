@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 import '../pages/posts/posts_page.dart';
-// import '../pages/bookmarks/bookmarks_page.dart';
+import '../pages/book//bookmarks_page.dart';
 // import '../pages/profile/profile_page.dart';
 
 class BottomNavbar extends StatelessWidget {
@@ -15,17 +15,18 @@ class BottomNavbar extends StatelessWidget {
 
     switch (index) {
       case 0:
-      case 1:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const PostsPage()),
         );
+      case 1:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BookmarksPage()),
+        );
         break;
-
       case 2:
-        // TODO: BookmarksPage
         break;
-
       case 3:
         // TODO: ProfilePage
         break;
@@ -51,8 +52,8 @@ class BottomNavbar extends StatelessWidget {
         tabBackgroundColor: Colors.black,
         tabs: const [
           GButton(icon: Icons.home_outlined, text: 'Home'),
-          GButton(icon: Icons.article_outlined, text: 'Posts'),
           GButton(icon: Icons.bookmark_outline, text: 'Bookmarks'),
+          GButton(icon: Icons.article_outlined, text: 'Posts'),
           GButton(icon: Icons.person_outline, text: 'Profile'),
         ],
       ),
