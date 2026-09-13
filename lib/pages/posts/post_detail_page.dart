@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../components/comments/comment_section.dart';
 import '../../services/api_service.dart';
 import '../../services/token_storage.dart';
 
@@ -21,11 +22,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
   bool isBookmarked = false;
   bool isBookmarkLoading = false;
 
-  // COMMENTS
-  List<dynamic> comments = [];
-  bool isCommentLoading = true;
-  final commentController = TextEditingController();
-
   // USER LOGIN
   int? currentUserId;
 
@@ -35,12 +31,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
     getCurrentUser();
     getPostDetail();
-  }
-
-  @override
-  void dispose() {
-    commentController.dispose();
-    super.dispose();
   }
 
   // ================= USER LOGIN =================
@@ -59,6 +49,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
         utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
       );
 
+      if (!mounted) return;
+
       setState(() {
         currentUserId = payload['id'];
       });
@@ -73,92 +65,22 @@ class _PostDetailPageState extends State<PostDetailPage> {
     try {
       final data = await ApiService.getPostById(widget.id);
 
+      if (!mounted) return;
+
       setState(() {
         post = data;
         isLoading = false;
       });
 
       checkBookmark();
-      getComments();
     } catch (e) {
       print(e);
+
+      if (!mounted) return;
 
       setState(() {
         isLoading = false;
       });
-    }
-  }
-
-  // ================= GET COMMENTS =================
-
-  Future<void> getComments() async {
-    try {
-      final data = await ApiService.getComments(widget.id);
-
-      setState(() {
-        comments = data;
-        isCommentLoading = false;
-      });
-    } catch (e) {
-      print(e);
-
-      setState(() {
-        isCommentLoading = false;
-      });
-    }
-  }
-
-  // ================= ADD COMMENT =================
-
-  Future<void> addComment() async {
-    final comment = commentController.text.trim();
-
-    if (comment.isEmpty) return;
-
-    try {
-      await ApiService.createComment(widget.id, comment);
-
-      commentController.clear();
-
-      await getComments();
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Komentar berhasil ditambahkan')),
-      );
-    } catch (e) {
-      print(e);
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal menambahkan komentar')),
-      );
-    }
-  }
-
-  // ================= DELETE COMMENT =================
-
-  Future<void> removeComment(int commentId) async {
-    try {
-      await ApiService.deleteComment(commentId);
-
-      await getComments();
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Komentar berhasil dihapus')),
-      );
-    } catch (e) {
-      print(e);
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Gagal menghapus komentar')));
     }
   }
 
@@ -170,6 +92,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
       for (final bookmark in bookmarks) {
         if (bookmark['postId'] == widget.id) {
+          if (!mounted) return;
+
           setState(() {
             isBookmarked = true;
           });
@@ -198,12 +122,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
         await ApiService.createBookmark(widget.id);
       }
 
+      if (!mounted) return;
+
       setState(() {
         isBookmarked = !isBookmarked;
         isBookmarkLoading = false;
       });
     } catch (e) {
       print(e);
+
+      if (!mounted) return;
 
       setState(() {
         isBookmarkLoading = false;
@@ -304,7 +232,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // CATEGORY
+                  // ================= CATEGORY =================
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -327,7 +255,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 16),
 
-                  // TITLE
+                  // ================= TITLE =================
                   Text(
                     post!['title'] ?? '',
                     style: const TextStyle(
@@ -340,7 +268,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 18),
 
-                  // AUTHOR
+                  // ================= AUTHOR =================
                   Row(
                     children: [
                       const CircleAvatar(
@@ -383,7 +311,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 28),
 
-                  // SUMMARY
+                  // ================= SUMMARY =================
                   if (_hasText(post!['summary']))
                     Container(
                       padding: const EdgeInsets.only(left: 16),
@@ -405,7 +333,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 30),
 
-                  // CONTENT
+                  // ================= CONTENT =================
                   if (_hasText(post!['content']))
                     Text(
                       post!['content'],
@@ -418,17 +346,20 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                   const SizedBox(height: 32),
 
-                  // INFORMATION
+                  // ================= INFORMATION =================
                   if (_hasText(post!['location']) || _hasText(post!['source']))
                     _buildInformation(),
 
-                  // GALLERY
+                  // ================= GALLERY =================
                   ..._buildGallery(),
 
                   const SizedBox(height: 30),
 
-                  // COMMENTS
-                  _buildComments(),
+                  // ================= COMMENTS =================
+                  CommentSection(
+                    postId: widget.id,
+                    currentUserId: currentUserId,
+                  ),
                 ],
               ),
             ),
@@ -603,143 +534,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     ];
   }
 
-  // ================= COMMENTS =================
-
-  Widget _buildComments() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Comments',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-        ),
-
-        const SizedBox(height: 16),
-
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: commentController,
-                minLines: 1,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'Tulis komentar...',
-                  filled: true,
-                  fillColor: const Color(0xFFF5F5F5),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            IconButton(
-              onPressed: addComment,
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-              ),
-              icon: const Icon(Icons.send, size: 18),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 24),
-
-        if (isCommentLoading)
-          const Center(child: CircularProgressIndicator())
-        else if (comments.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Text(
-                'Belum ada komentar',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-          )
-        else
-          ...comments.map((comment) {
-            return _buildCommentItem(comment);
-          }),
-      ],
-    );
-  }
-
-  // ================= COMMENT ITEM =================
-
-  Widget _buildCommentItem(dynamic comment) {
-    final isMyComment = currentUserId == comment['userId'];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const CircleAvatar(
-            radius: 18,
-            backgroundColor: Color(0xFFEAEAEA),
-            child: Icon(Icons.person_outline, size: 18, color: Colors.black54),
-          ),
-
-          const SizedBox(width: 10),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  comment['userName'] ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-
-                const SizedBox(height: 5),
-
-                Text(
-                  comment['comment'] ?? '',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.5,
-                    color: Colors.black87,
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                Text(
-                  _formatCommentDate(comment['createdAt']),
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-
-          // HANYA PUNYA KOMENTAR YANG BISA HAPUS
-          if (isMyComment)
-            IconButton(
-              onPressed: () {
-                removeComment(comment['id']);
-              },
-              icon: const Icon(Icons.delete_outline, size: 18),
-            ),
-        ],
-      ),
-    );
-  }
-
   // ================= IMAGE ERROR =================
 
   Widget _imageError() {
@@ -767,16 +561,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     if (createdAt == null) return '';
 
     final date = DateTime.tryParse(createdAt.toString());
-
-    if (date == null) return '';
-
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  String _formatCommentDate(dynamic value) {
-    if (value == null) return '';
-
-    final date = DateTime.tryParse(value.toString());
 
     if (date == null) return '';
 
