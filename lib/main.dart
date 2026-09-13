@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:mobile/pages/auth/login_page.dart';
+import 'package:mobile/auth.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
 
       theme: ThemeData(textTheme: GoogleFonts.plusJakartaSansTextTheme()),
 
-      home: const LoginPage(),
+      home: const AuthCheck(),
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../services/api_service.dart';
 
+import '../../components/bottom_navbar.dart';
+
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
 
@@ -20,7 +22,14 @@ class _PostsPageState extends State<PostsPage> {
 
   final TextEditingController searchController = TextEditingController();
 
-  final List<String> categories = ['Semua', 'Teknologi', 'Pertanian', 'Work'];
+  final List<String> categories = [
+    'Semua',
+    'Teknologi',
+    'Pertanian',
+    'Pendidikan',
+    'Kesehatan',
+    'Bisnis',
+  ];
 
   String selectedCategory = 'Semua';
 
@@ -39,11 +48,13 @@ class _PostsPageState extends State<PostsPage> {
     try {
       final data = await ApiService.getPosts();
 
+      final publishedposts = data
+          .where((post) => post['status'] == 'published')
+          .toList();
+
       setState(() {
-        posts = data;
-
-        filteredPosts = data;
-
+        posts = publishedposts;
+        filteredPosts = publishedposts;
         isLoading = false;
       });
     } catch (e) {
@@ -235,159 +246,163 @@ class _PostsPageState extends State<PostsPage> {
 
                 // POSTS
                 Expanded(
-                  child: filteredPosts.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No posts found',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        )
-                      : GridView.builder(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 22,
-                                childAspectRatio: 0.68,
+                  child: RefreshIndicator(
+                    onRefresh: getPosts,
+                    child: filteredPosts.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No posts found',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
-                          itemCount: filteredPosts.length,
-                          itemBuilder: (context, index) {
-                            final post = filteredPosts[index];
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // IMAGE
-                                if (post['coverImage'] != null)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      post['coverImage'],
-                                      width: double.infinity,
-                                      height: 110,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Container(
-                                              width: double.infinity,
-                                              height: 110,
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFEAEAEA),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: const Icon(
-                                                Icons.image_outlined,
-                                                color: Colors.grey,
-                                              ),
-                                            );
-                                          },
-                                    ),
-                                  ),
-
-                                const SizedBox(height: 7),
-
-                                // CATEGORY
-                                Text(
-                                  (post['category'] ?? 'POST').toString(),
-                                  style: const TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey,
-                                    letterSpacing: 0.2,
-                                  ),
+                            ),
+                          )
+                        : GridView.builder(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: 0.9,
                                 ),
+                            itemCount: filteredPosts.length,
+                            itemBuilder: (context, index) {
+                              final post = filteredPosts[index];
 
-                                const SizedBox(height: 6),
-
-                                // TITLE
-                                SizedBox(
-                                  height: 32,
-                                  child: Text(
-                                    post['title'] ?? '',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      height: 1.2,
-                                      color: Colors.black,
-                                    ),
+                              return Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(
+                                    255,
+                                    255,
+                                    255,
+                                    255,
                                   ),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-
-                                const SizedBox(height: 5),
-
-                                // SUMMARY
-                                Text(
-                                  post['summary'] ?? '',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 9.5,
-                                    color: Colors.grey,
-                                    height: 1.3,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 5),
-
-                                // AUTHOR AND DATE
-                                Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(
-                                      Icons.person_outline,
-                                      size: 11,
-                                      color: Colors.grey,
-                                    ),
+                                    // IMAGE
+                                    if (post['coverImage'] != null)
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          post['coverImage'],
+                                          width: double.infinity,
+                                          height: 110,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Container(
+                                                  width: double.infinity,
+                                                  height: 110,
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(
+                                                      0xFFEAEAEA,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.image_outlined,
+                                                    color: Colors.grey,
+                                                  ),
+                                                );
+                                              },
+                                        ),
+                                      ),
 
-                                    const SizedBox(width: 3),
+                                    const SizedBox(height: 7),
 
+                                    // CATEGORY
                                     Text(
-                                      post['author'] ?? 'Unknown',
+                                      (post['category'] ?? 'POST').toString(),
                                       style: const TextStyle(
                                         fontSize: 8,
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.grey,
+                                        letterSpacing: 0.2,
                                       ),
                                     ),
 
-                                    const SizedBox(width: 8),
+                                    const SizedBox(height: 6),
 
-                                    const Icon(
-                                      Icons.calendar_today_outlined,
-                                      size: 10,
-                                      color: Colors.grey,
+                                    // TITLE
+                                    SizedBox(
+                                      height: 32,
+                                      child: Text(
+                                        post['title'] ?? '',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.2,
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
 
-                                    const SizedBox(width: 3),
+                                    const SizedBox(height: 8),
 
+                                    // SUMMARY
                                     Text(
-                                      '${DateTime.parse(post['createdAt'].toString()).day}/'
-                                      '${DateTime.parse(post['createdAt'].toString()).month}/'
-                                      '${DateTime.parse(post['createdAt'].toString()).year}',
+                                      post['summary'] ?? '',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        fontSize: 8,
+                                        fontSize: 9.5,
                                         color: Colors.grey,
+                                        height: 1.3,
                                       ),
+                                    ),
+
+                                    const SizedBox(height: 5),
+
+                                    // AUTHOR AND DATE
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.person_outline,
+                                          size: 11,
+                                          color: Colors.grey,
+                                        ),
+
+                                        const SizedBox(width: 3),
+
+                                        Expanded(
+                                          child: Text(
+                                            _postMeta(post),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 8,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          ),
+                  ),
                 ),
               ],
             ),
+      bottomNavigationBar: const BottomNavbar(currentIndex: 0),
     );
   }
 
   String _postMeta(dynamic post) {
-    final author = post['author'];
+    final author = post['author'] ?? 'Unknown';
     final date = DateTime.parse(post['createdAt'].toString());
     return '$author · ${date.day}/${date.month}/${date.year}';
   }
