@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'dart:io';
 import '../config/api_config.dart';
 import 'token_storage.dart';
 
@@ -39,23 +39,6 @@ class ApiService {
     return await get('/posts/$id');
   }
 
-  // UPDATE POST
-  static Future<bool> updatePost(int id, String title, String content) async {
-    final token = await getToken();
-    final response = await http.patch(
-      Uri.parse('${ApiConfig.baseUrl}/posts/$id'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({'title': title, 'content': content}),
-    );
-    if (response.statusCode == 200) {
-      return true;
-    }
-    throw Exception('Gagal mengubah postingan (${response.statusCode})');
-  }
-
   // DELETE POST
   static Future<bool> deletePost(int id) async {
     final token = await getToken();
@@ -69,7 +52,7 @@ class ApiService {
       return true;
     }
 
-    throw Exception('Gagal menghapus postingan (${response.statusCode})');
+    throw Exception('Gagal menghapus post (${response.statusCode})');
   }
 
   // GET ALL BOOKMARKS
@@ -166,5 +149,73 @@ class ApiService {
     final data = jsonDecode(response.body);
 
     throw Exception(data['message'] ?? 'Gagal menghapus komentar');
+  }
+
+  static Future<List<dynamic>> getCategories() async {
+    final token = await getToken();
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/categories'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      return data['data'];
+    }
+
+    throw Exception('Gagal mengambil kategori (${response.statusCode})');
+  }
+
+  static Future<bool> updatePost({
+    required int id,
+    required int categoryId,
+    required String slug,
+    required String title,
+    required String content,
+    required String summary,
+    required String source,
+    required String location,
+    required String status,
+    File? image,
+  }) async {
+    final token = await getToken();
+
+    final request = http.MultipartRequest(
+      'PATCH',
+      Uri.parse('${ApiConfig.baseUrl}/posts/$id'),
+    );
+
+    request.headers['Authorization'] = 'Bearer $token';
+
+    request.fields['categoryId'] = categoryId.toString();
+    request.fields['slug'] = slug;
+    request.fields['title'] = title;
+    request.fields['content'] = content;
+    request.fields['summary'] = summary;
+    request.fields['source'] = source;
+    request.fields['location'] = location;
+    request.fields['status'] = status;
+
+    if (image != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('coverImage', image.path),
+      );
+    }
+
+    final response = await request.send();
+
+    final responseBody = await response.stream.bytesToString();
+
+    print('UPDATE POST STATUS: ${response.statusCode}');
+
+    print('UPDATE POST RESPONSE: $responseBody');
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    throw Exception('Gagal mengubah post (${response.statusCode})');
   }
 }
