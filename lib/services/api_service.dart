@@ -168,6 +168,74 @@ class ApiService {
     throw Exception('Gagal mengambil kategori (${response.statusCode})');
   }
 
+  // ================= PROFILE =================
+
+  // GET PROFILE
+  static Future<Map<String, dynamic>> getProfile() async {
+    final token = await getToken();
+
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/auth/profile'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return data['data'];
+    }
+
+    throw Exception(data['message'] ?? 'Gagal mengambil profile');
+  }
+
+  // UPDATE PROFILE
+  static Future<bool> updateProfile({
+    required String name,
+    required String email,
+    String? phoneNumber,
+  }) async {
+    final token = await getToken();
+
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/auth/profile'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'phoneNumber': phoneNumber,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+
+    throw Exception(data['message'] ?? 'Gagal memperbarui profile');
+  }
+
+  // DELETE PROFILE
+  static Future<bool> deleteProfile() async {
+    final token = await getToken();
+
+    final response = await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/auth/profile'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    }
+
+    throw Exception(data['message'] ?? 'Gagal menghapus akun');
+  }
+
   // CREATE POST
   static Future<bool> createPost({
     required int categoryId,
