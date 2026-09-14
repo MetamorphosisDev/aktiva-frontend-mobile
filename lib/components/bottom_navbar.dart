@@ -4,6 +4,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import '../pages/posts/posts_page.dart';
 import '../pages/book/bookmarks_page.dart';
 import '../pages/mypost/mypost_page.dart';
+import '../pages/profile/profile_page.dart';
 
 class BottomNavbar extends StatelessWidget {
   final int currentIndex;
@@ -36,7 +37,10 @@ class BottomNavbar extends StatelessWidget {
         break;
 
       case 3:
-        // TODO: ProfilePage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfilePage()),
+        );
         break;
     }
   }

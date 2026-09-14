@@ -478,7 +478,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
       ),
 
       const SizedBox(height: 14),
-
       ...images.map((image) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
