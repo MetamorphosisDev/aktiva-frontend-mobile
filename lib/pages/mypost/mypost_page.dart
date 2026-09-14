@@ -1,12 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../components/bottom_navbar.dart';
 import '../../services/api_service.dart';
-import '../../services/token_storage.dart';
+import 'editpost/editpost_page.dart';
 
 class MyPostPage extends StatefulWidget {
   const MyPostPage({super.key});
@@ -17,10 +13,8 @@ class MyPostPage extends StatefulWidget {
 
 class _MyPostPageState extends State<MyPostPage> {
   List<dynamic> posts = [];
-  List<dynamic> categories = [];
 
   bool isLoading = true;
-  int? currentUserId;
 
   @override
   void initState() {
@@ -28,44 +22,18 @@ class _MyPostPageState extends State<MyPostPage> {
     getMyPosts();
   }
 
-  // ================= GET MY POSTS =================
+  // ================= GET POSTS =================
 
   Future<void> getMyPosts() async {
     try {
-      final token = await TokenStorage.getToken();
-
-      if (token == null) {
-        throw Exception('Token tidak ditemukan');
-      }
-
-      final parts = token.split('.');
-
-      if (parts.length != 3) {
-        throw Exception('Token tidak valid');
-      }
-
-      final payload = jsonDecode(
-        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
-      );
-
-      currentUserId = payload['id'];
-
       final data = await ApiService.getPosts();
 
-      final myPosts = data.where((post) {
-        return post['userId'] == currentUserId;
-      }).toList();
-
-      if (!mounted) return;
-
       setState(() {
-        posts = myPosts;
+        posts = data;
         isLoading = false;
       });
     } catch (e) {
-      print(e);
-
-      if (!mounted) return;
+      print('Gagal mengambil postingan: $e');
 
       setState(() {
         isLoading = false;
@@ -73,339 +41,26 @@ class _MyPostPageState extends State<MyPostPage> {
     }
   }
 
-  // ================= GET CATEGORIES =================
+  // ================= EDIT =================
 
-  Future<void> getCategories() async {
-    try {
-      final data = await ApiService.getCategories();
-
-      if (!mounted) return;
-
-      setState(() {
-        categories = data;
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  // ================= EDIT POST =================
-
-  Future<void> editPost(dynamic post) async {
-    await getCategories();
-
-    if (!mounted) return;
-
-    final titleController = TextEditingController(text: post['title'] ?? '');
-
-    final slugController = TextEditingController(text: post['slug'] ?? '');
-
-    final summaryController = TextEditingController(
-      text: post['summary'] ?? '',
+  Future<void> editPost(int postId) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return EditPostPage(postId: postId);
+        },
+      ),
     );
-
-    final contentController = TextEditingController(
-      text: post['content'] ?? '',
-    );
-
-    final sourceController = TextEditingController(text: post['source'] ?? '');
-
-    final locationController = TextEditingController(
-      text: post['location'] ?? '',
-    );
-
-    int? selectedCategoryId = post['categoryId'];
-
-    String selectedStatus = post['status'] ?? 'draft';
-
-    File? selectedImage;
-
-    final picker = ImagePicker();
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text(
-                'Edit Postingan',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-
-              content: SizedBox(
-                width: 500,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // ================= COVER IMAGE =================
-                      GestureDetector(
-                        onTap: () async {
-                          final pickedImage = await picker.pickImage(
-                            source: ImageSource.gallery,
-                          );
-
-                          if (pickedImage == null) return;
-
-                          setDialogState(() {
-                            selectedImage = File(pickedImage.path);
-                          });
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          height: 160,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEDEDED),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: selectedImage != null
-                              ? Image.file(selectedImage!, fit: BoxFit.cover)
-                              : post['coverImage'] != null &&
-                                    post['coverImage'].toString().isNotEmpty
-                              ? Image.network(
-                                  post['coverImage'],
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Center(
-                                      child: Icon(
-                                        Icons.image_outlined,
-                                        size: 40,
-                                        color: Colors.grey,
-                                      ),
-                                    );
-                                  },
-                                )
-                              : const Center(
-                                  child: Icon(
-                                    Icons.add_photo_alternate_outlined,
-                                    size: 40,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Tap gambar untuk mengganti cover',
-                          style: TextStyle(fontSize: 11, color: Colors.grey),
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      // ================= CATEGORY =================
-                      DropdownButtonFormField<int>(
-                        value: selectedCategoryId,
-                        decoration: const InputDecoration(
-                          labelText: 'Kategori',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: categories.map((category) {
-                          return DropdownMenuItem<int>(
-                            value: category['id'],
-                            child: Text(category['categoryName'] ?? ''),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setDialogState(() {
-                            selectedCategoryId = value;
-                          });
-                        },
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ================= TITLE =================
-                      TextField(
-                        controller: titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Judul',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ================= SLUG =================
-                      TextField(
-                        controller: slugController,
-                        decoration: const InputDecoration(
-                          labelText: 'Slug',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ================= SUMMARY =================
-                      TextField(
-                        controller: summaryController,
-                        maxLines: 3,
-                        decoration: const InputDecoration(
-                          labelText: 'Ringkasan',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ================= CONTENT =================
-                      TextField(
-                        controller: contentController,
-                        maxLines: 7,
-                        decoration: const InputDecoration(
-                          labelText: 'Isi Postingan',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ================= SOURCE =================
-                      TextField(
-                        controller: sourceController,
-                        decoration: const InputDecoration(
-                          labelText: 'Sumber',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ================= LOCATION =================
-                      TextField(
-                        controller: locationController,
-                        decoration: const InputDecoration(
-                          labelText: 'Lokasi',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // ================= STATUS =================
-                      DropdownButtonFormField<String>(
-                        value: selectedStatus,
-                        decoration: const InputDecoration(
-                          labelText: 'Status',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'draft',
-                            child: Text('Draft'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'published',
-                            child: Text('Published'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value == null) return;
-
-                          setDialogState(() {
-                            selectedStatus = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // ================= BUTTON =================
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext, false);
-                  },
-                  child: const Text('Batal'),
-                ),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    if (selectedCategoryId == null) {
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        const SnackBar(content: Text('Kategori wajib dipilih')),
-                      );
-                      return;
-                    }
-
-                    if (titleController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        const SnackBar(content: Text('Judul wajib diisi')),
-                      );
-                      return;
-                    }
-
-                    if (contentController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        const SnackBar(
-                          content: Text('Isi postingan wajib diisi'),
-                        ),
-                      );
-                      return;
-                    }
-
-                    try {
-                      await ApiService.updatePost(
-                        id: post['id'],
-                        categoryId: selectedCategoryId!,
-                        slug: slugController.text.trim(),
-                        title: titleController.text.trim(),
-                        content: contentController.text.trim(),
-                        summary: summaryController.text.trim(),
-                        source: sourceController.text.trim(),
-                        location: locationController.text.trim(),
-                        status: selectedStatus,
-                        image: selectedImage,
-                      );
-
-                      if (!dialogContext.mounted) return;
-
-                      Navigator.pop(dialogContext, true);
-                    } catch (e) {
-                      print(e);
-
-                      if (!dialogContext.mounted) return;
-
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        SnackBar(content: Text('Gagal mengubah postingan: $e')),
-                      );
-                    }
-                  },
-                  child: const Text('Simpan'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    titleController.dispose();
-    slugController.dispose();
-    summaryController.dispose();
-    contentController.dispose();
-    sourceController.dispose();
-    locationController.dispose();
 
     if (result == true) {
-      await getMyPosts();
+      getMyPosts();
     }
   }
 
-  // ================= DELETE POST =================
+  // ================= DELETE =================
 
-  Future<void> deletePost(int id) async {
+  Future<void> deletePost(int postId) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -430,12 +85,14 @@ class _MyPostPageState extends State<MyPostPage> {
       },
     );
 
-    if (confirm != true) return;
+    if (confirm != true) {
+      return;
+    }
 
     try {
-      await ApiService.deletePost(id);
+      await ApiService.deletePost(postId);
 
-      await getMyPosts();
+      getMyPosts();
 
       if (!mounted) return;
 
@@ -443,7 +100,7 @@ class _MyPostPageState extends State<MyPostPage> {
         const SnackBar(content: Text('Postingan berhasil dihapus')),
       );
     } catch (e) {
-      print(e);
+      print('Gagal menghapus: $e');
 
       if (!mounted) return;
 
@@ -455,7 +112,7 @@ class _MyPostPageState extends State<MyPostPage> {
 
   // ================= POST CARD =================
 
-  Widget _buildPostCard(dynamic post) {
+  Widget postCard(dynamic post) {
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
@@ -466,7 +123,7 @@ class _MyPostPageState extends State<MyPostPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ================= IMAGE =================
+          // IMAGE
           Stack(
             children: [
               if (post['coverImage'] != null &&
@@ -477,13 +134,13 @@ class _MyPostPageState extends State<MyPostPage> {
                   height: 190,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return _imagePlaceholder();
+                    return imagePlaceholder();
                   },
                 )
               else
-                _imagePlaceholder(),
+                imagePlaceholder(),
 
-              // ================= MENU =================
+              // MENU
               Positioned(
                 top: 12,
                 right: 12,
@@ -495,31 +152,33 @@ class _MyPostPageState extends State<MyPostPage> {
                   child: PopupMenuButton(
                     padding: EdgeInsets.zero,
                     icon: const Icon(Icons.more_horiz, color: Colors.black),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit_outlined, size: 20),
-                            SizedBox(width: 10),
-                            Text('Edit'),
-                          ],
+                    itemBuilder: (context) {
+                      return const [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 20),
+                              SizedBox(width: 10),
+                              Text('Edit'),
+                            ],
+                          ),
                         ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete_outline, size: 20),
-                            SizedBox(width: 10),
-                            Text('Hapus'),
-                          ],
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, size: 20),
+                              SizedBox(width: 10),
+                              Text('Hapus'),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ];
+                    },
                     onSelected: (value) {
                       if (value == 'edit') {
-                        editPost(post);
+                        editPost(post['id']);
                       }
 
                       if (value == 'delete') {
@@ -532,13 +191,13 @@ class _MyPostPageState extends State<MyPostPage> {
             ],
           ),
 
-          // ================= CONTENT =================
+          // CONTENT
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ================= CATEGORY =================
+                // CATEGORY
                 if (post['category'] != null)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -562,7 +221,7 @@ class _MyPostPageState extends State<MyPostPage> {
 
                 const SizedBox(height: 12),
 
-                // ================= TITLE =================
+                // TITLE
                 Text(
                   post['title'] ?? 'Tanpa judul',
                   maxLines: 2,
@@ -571,13 +230,12 @@ class _MyPostPageState extends State<MyPostPage> {
                     fontSize: 21,
                     fontWeight: FontWeight.w700,
                     height: 1.2,
-                    color: Colors.black,
                   ),
                 ),
 
                 const SizedBox(height: 10),
 
-                // ================= SUMMARY =================
+                // SUMMARY
                 Text(
                   post['summary'] ?? post['content'] ?? '',
                   maxLines: 3,
@@ -591,7 +249,7 @@ class _MyPostPageState extends State<MyPostPage> {
 
                 const SizedBox(height: 16),
 
-                // ================= AUTHOR =================
+                // AUTHOR
                 Row(
                   children: [
                     const CircleAvatar(
@@ -606,28 +264,27 @@ class _MyPostPageState extends State<MyPostPage> {
 
                     const SizedBox(width: 9),
 
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            post['author'] ?? 'Saya',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          post['author'] ?? 'Saya',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _getDate(post['createdAt']),
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey,
-                            ),
+                        ),
+
+                        const SizedBox(height: 2),
+
+                        Text(
+                          getDate(post['createdAt']),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -639,9 +296,9 @@ class _MyPostPageState extends State<MyPostPage> {
     );
   }
 
-  // ================= IMAGE PLACEHOLDER =================
+  // ================= IMAGE =================
 
-  Widget _imagePlaceholder() {
+  Widget imagePlaceholder() {
     return Container(
       width: double.infinity,
       height: 190,
@@ -654,14 +311,18 @@ class _MyPostPageState extends State<MyPostPage> {
 
   // ================= DATE =================
 
-  String _getDate(dynamic createdAt) {
-    if (createdAt == null) return '';
+  String getDate(dynamic date) {
+    if (date == null) {
+      return '';
+    }
 
-    final date = DateTime.tryParse(createdAt.toString())?.toLocal();
+    final result = DateTime.tryParse(date.toString());
 
-    if (date == null) return '';
+    if (result == null) {
+      return '';
+    }
 
-    return '${date.day}/${date.month}/${date.year}';
+    return '${result.day}/${result.month}/${result.year}';
   }
 
   // ================= BUILD =================
@@ -671,7 +332,6 @@ class _MyPostPageState extends State<MyPostPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
 
-      // ================= APP BAR =================
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -685,25 +345,23 @@ class _MyPostPageState extends State<MyPostPage> {
         ),
       ),
 
-      // ================= BODY =================
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : posts.isEmpty
           ? const Center(
               child: Text(
                 'Belum ada postingan',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                style: TextStyle(color: Colors.grey),
               ),
             )
           : ListView.builder(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                return _buildPostCard(posts[index]);
+                return postCard(posts[index]);
               },
             ),
 
-      // ================= BOTTOM NAVBAR =================
       bottomNavigationBar: const BottomNavbar(currentIndex: 2),
     );
   }
