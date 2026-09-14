@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../components/bottom_navbar.dart';
 import '../../services/api_service.dart';
+
 import 'editpost/editpost_page.dart';
+import 'addpost/addpost_page.dart';
 
 class MyPostPage extends StatefulWidget {
   const MyPostPage({super.key});
@@ -343,8 +345,23 @@ class _MyPostPageState extends State<MyPostPage> {
             fontWeight: FontWeight.w700,
           ),
         ),
-      ),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddPostPage()),
+              );
 
+              if (result == true) {
+                getMyPosts();
+              }
+            },
+            icon: const Icon(Icons.add, color: Colors.black),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : posts.isEmpty

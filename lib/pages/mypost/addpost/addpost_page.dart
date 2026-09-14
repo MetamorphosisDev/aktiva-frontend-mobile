@@ -5,27 +5,18 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../services/api_service.dart';
 
-class EditPostPage extends StatefulWidget {
-  final int postId;
-
-  const EditPostPage({super.key, required this.postId});
+class AddPostPage extends StatefulWidget {
+  const AddPostPage({super.key});
 
   @override
-  State<EditPostPage> createState() => _EditPostPageState();
+  State<AddPostPage> createState() => _AddPostPageState();
 }
 
-class _EditPostPageState extends State<EditPostPage> {
-  // ================= DATA =================
-
-  Map<String, dynamic>? post;
+class _AddPostPageState extends State<AddPostPage> {
   List<dynamic> categories = [];
-
-  // ================= STATUS =================
 
   bool isLoading = true;
   bool isSaving = false;
-
-  // ================= FORM =================
 
   int? selectedCategoryId;
   String selectedStatus = 'draft';
@@ -34,8 +25,6 @@ class _EditPostPageState extends State<EditPostPage> {
 
   final picker = ImagePicker();
 
-  // ================= CONTROLLER =================
-
   final titleController = TextEditingController();
   final slugController = TextEditingController();
   final summaryController = TextEditingController();
@@ -43,12 +32,10 @@ class _EditPostPageState extends State<EditPostPage> {
   final sourceController = TextEditingController();
   final locationController = TextEditingController();
 
-  // ================= INIT =================
-
   @override
   void initState() {
     super.initState();
-    loadData();
+    loadCategories();
   }
 
   @override
@@ -59,41 +46,22 @@ class _EditPostPageState extends State<EditPostPage> {
     contentController.dispose();
     sourceController.dispose();
     locationController.dispose();
-
     super.dispose();
   }
 
-  // ================= LOAD DATA =================
-
-  Future<void> loadData() async {
+  // ================= GET CATEGORIES =================
+  Future<void> loadCategories() async {
     try {
-      // GET POST
-      final postData = await ApiService.getPostById(widget.postId);
-
-      // GET CATEGORY
-      final categoryData = await ApiService.getCategories();
-
-      // MASUKKAN DATA KE FORM
-      titleController.text = postData['title'] ?? '';
-      slugController.text = postData['slug'] ?? '';
-      summaryController.text = postData['summary'] ?? '';
-      contentController.text = postData['content'] ?? '';
-      sourceController.text = postData['source'] ?? '';
-      locationController.text = postData['location'] ?? '';
+      final data = await ApiService.getCategories();
 
       if (!mounted) return;
 
       setState(() {
-        post = postData;
-        categories = categoryData;
-
-        selectedCategoryId = postData['categoryId'];
-        selectedStatus = postData['status'] ?? 'draft';
-
+        categories = data;
         isLoading = false;
       });
     } catch (e) {
-      print('Gagal mengambil data: $e');
+      print('Gagal mengambil kategori: $e');
 
       if (!mounted) return;
 
@@ -101,9 +69,9 @@ class _EditPostPageState extends State<EditPostPage> {
         isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal mengambil postingan')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal mengambil kategori: $e')));
     }
   }
 
@@ -113,9 +81,7 @@ class _EditPostPageState extends State<EditPostPage> {
     try {
       final image = await picker.pickImage(source: ImageSource.gallery);
 
-      if (image == null) {
-        return;
-      }
+      if (image == null) return;
 
       setState(() {
         selectedImage = image;
@@ -125,10 +91,9 @@ class _EditPostPageState extends State<EditPostPage> {
     }
   }
 
-  // ================= UPDATE =================
+  // ================= CREATE POST =================
 
   Future<void> savePost() async {
-    // VALIDASI KATEGORI
     if (selectedCategoryId == null) {
       ScaffoldMessenger.of(
         context,
@@ -136,7 +101,6 @@ class _EditPostPageState extends State<EditPostPage> {
       return;
     }
 
-    // VALIDASI JUDUL
     if (titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -144,7 +108,6 @@ class _EditPostPageState extends State<EditPostPage> {
       return;
     }
 
-    // VALIDASI ISI
     if (contentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Isi postingan wajib diisi')),
@@ -152,10 +115,8 @@ class _EditPostPageState extends State<EditPostPage> {
       return;
     }
 
-    // SLUG
     String slug = slugController.text.trim();
 
-    // Kalau slug kosong, buat dari judul
     if (slug.isEmpty) {
       slug = titleController.text
           .trim()
@@ -170,16 +131,13 @@ class _EditPostPageState extends State<EditPostPage> {
         isSaving = true;
       });
 
-      // XFile -> File
       File? imageFile;
 
       if (selectedImage != null) {
         imageFile = File(selectedImage!.path);
       }
 
-      // UPDATE POST
-      await ApiService.updatePost(
-        id: widget.postId,
+      await ApiService.createPost(
         categoryId: selectedCategoryId!,
         slug: slug,
         title: titleController.text.trim(),
@@ -194,13 +152,12 @@ class _EditPostPageState extends State<EditPostPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Postingan berhasil diubah')),
+        const SnackBar(content: Text('Postingan berhasil dibuat')),
       );
 
-      // BALIK KE MY POST
       Navigator.pop(context, true);
     } catch (e) {
-      print('GAGAL UPDATE: $e');
+      print('Gagal membuat post: $e');
 
       if (!mounted) return;
 
@@ -210,14 +167,13 @@ class _EditPostPageState extends State<EditPostPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Gagal: $e')));
+      ).showSnackBar(SnackBar(content: Text('Gagal membuat postingan: $e')));
     }
   }
 
   // ================= IMAGE PREVIEW =================
 
   Widget imagePreview() {
-    // GAMBAR BARU
     if (selectedImage != null) {
       return FutureBuilder(
         future: selectedImage!.readAsBytes(),
@@ -236,25 +192,8 @@ class _EditPostPageState extends State<EditPostPage> {
       );
     }
 
-    // GAMBAR LAMA
-    final image = post?['coverImage'];
-
-    if (image != null && image.toString().isNotEmpty) {
-      return Image.network(
-        image,
-        width: double.infinity,
-        height: 200,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return imagePlaceholder();
-        },
-      );
-    }
-
     return imagePlaceholder();
   }
-
-  // ================= IMAGE PLACEHOLDER =================
 
   Widget imagePlaceholder() {
     return Container(
@@ -283,20 +222,17 @@ class _EditPostPageState extends State<EditPostPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
 
-      // ================= APP BAR =================
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
         ),
-
         title: const Text(
-          'Edit Postingan',
+          'Tambah Postingan',
           style: TextStyle(
             color: Colors.black,
             fontSize: 20,
@@ -305,7 +241,6 @@ class _EditPostPageState extends State<EditPostPage> {
         ),
       ),
 
-      // ================= BODY =================
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -313,7 +248,6 @@ class _EditPostPageState extends State<EditPostPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ================= COVER =================
                   const Text(
                     'Cover',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
@@ -333,13 +267,13 @@ class _EditPostPageState extends State<EditPostPage> {
                     child: OutlinedButton.icon(
                       onPressed: pickImage,
                       icon: const Icon(Icons.image_outlined),
-                      label: const Text('Ganti Gambar'),
+                      label: const Text('Pilih Gambar'),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // ================= KATEGORI =================
+                  // CATEGORY
                   DropdownButtonFormField<int>(
                     value: selectedCategoryId,
                     decoration: inputDecoration('Kategori'),
@@ -358,7 +292,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 14),
 
-                  // ================= JUDUL =================
+                  // TITLE
                   TextField(
                     controller: titleController,
                     decoration: inputDecoration('Judul'),
@@ -366,7 +300,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 14),
 
-                  // ================= SLUG =================
+                  // SLUG
                   TextField(
                     controller: slugController,
                     decoration: inputDecoration('Slug'),
@@ -374,7 +308,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 14),
 
-                  // ================= RINGKASAN =================
+                  // SUMMARY
                   TextField(
                     controller: summaryController,
                     maxLines: 3,
@@ -383,7 +317,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 14),
 
-                  // ================= ISI =================
+                  // CONTENT
                   TextField(
                     controller: contentController,
                     maxLines: 8,
@@ -392,7 +326,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 14),
 
-                  // ================= SUMBER =================
+                  // SOURCE
                   TextField(
                     controller: sourceController,
                     decoration: inputDecoration('Sumber'),
@@ -400,7 +334,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 14),
 
-                  // ================= LOKASI =================
+                  // LOCATION
                   TextField(
                     controller: locationController,
                     decoration: inputDecoration('Lokasi'),
@@ -408,7 +342,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 14),
 
-                  // ================= STATUS =================
+                  // STATUS
                   DropdownButtonFormField<String>(
                     value: selectedStatus,
                     decoration: inputDecoration('Status'),
@@ -420,9 +354,7 @@ class _EditPostPageState extends State<EditPostPage> {
                       ),
                     ],
                     onChanged: (value) {
-                      if (value == null) {
-                        return;
-                      }
+                      if (value == null) return;
 
                       setState(() {
                         selectedStatus = value;
@@ -432,7 +364,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                   const SizedBox(height: 25),
 
-                  // ================= SAVE =================
+                  // SAVE BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -445,7 +377,7 @@ class _EditPostPageState extends State<EditPostPage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text(
-                              'Simpan Perubahan',
+                              'Tambahkan',
                               style: TextStyle(fontWeight: FontWeight.w600),
                             ),
                     ),

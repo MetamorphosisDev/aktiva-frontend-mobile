@@ -168,6 +168,56 @@ class ApiService {
     throw Exception('Gagal mengambil kategori (${response.statusCode})');
   }
 
+  // CREATE POST
+  static Future<bool> createPost({
+    required int categoryId,
+    required String slug,
+    required String title,
+    required String content,
+    required String summary,
+    required String source,
+    required String location,
+    required String status,
+    File? image,
+  }) async {
+    final token = await getToken();
+
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('${ApiConfig.baseUrl}/posts'),
+    );
+
+    request.headers['Authorization'] = 'Bearer $token';
+
+    request.fields['categoryId'] = categoryId.toString();
+    request.fields['slug'] = slug;
+    request.fields['title'] = title;
+    request.fields['content'] = content;
+    request.fields['summary'] = summary;
+    request.fields['source'] = source;
+    request.fields['location'] = location;
+    request.fields['status'] = status;
+
+    if (image != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('coverImage', image.path),
+      );
+    }
+
+    final response = await request.send();
+
+    final responseBody = await response.stream.bytesToString();
+
+    print('CREATE POST STATUS: ${response.statusCode}');
+    print('CREATE POST RESPONSE: $responseBody');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    }
+
+    throw Exception('Gagal membuat post (${response.statusCode})');
+  }
+
   static Future<bool> updatePost({
     required int id,
     required int categoryId,
