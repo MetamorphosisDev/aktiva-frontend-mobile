@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/api_service.dart';
+import '../../services/post_service.dart';
 import '../../components/bottom_navbar.dart';
 import './post_detail_page.dart';
 
@@ -43,7 +43,7 @@ class _PostsPageState extends State<PostsPage> {
 
   Future<void> getPosts() async {
     try {
-      final data = await ApiService.getPosts();
+      final data = await PostService.getPosts();
 
       final publishedPosts = data
           .where((post) => post['status'] == 'published')

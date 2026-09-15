@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/services/post_service.dart';
 
 import '../../components/bottom_navbar.dart';
 import '../../services/api_service.dart';
@@ -28,7 +29,7 @@ class _MyPostPageState extends State<MyPostPage> {
 
   Future<void> getMyPosts() async {
     try {
-      final data = await ApiService.getPosts();
+      final data = await PostService.getPosts();
 
       setState(() {
         posts = data;
@@ -92,7 +93,7 @@ class _MyPostPageState extends State<MyPostPage> {
     }
 
     try {
-      await ApiService.deletePost(postId);
+      await PostService.deletePost(postId);
 
       getMyPosts();
 

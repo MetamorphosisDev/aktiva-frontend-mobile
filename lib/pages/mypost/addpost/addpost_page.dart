@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../services/api_service.dart';
+import '../../../services/post_service.dart';
+import '../../../services/categories_service.dart';
 
 class AddPostPage extends StatefulWidget {
   const AddPostPage({super.key});
@@ -52,7 +53,7 @@ class _AddPostPageState extends State<AddPostPage> {
   // ================= GET CATEGORIES =================
   Future<void> loadCategories() async {
     try {
-      final data = await ApiService.getCategories();
+      final data = await CategoryService.getCategories();
 
       if (!mounted) return;
 
@@ -137,7 +138,7 @@ class _AddPostPageState extends State<AddPostPage> {
         imageFile = File(selectedImage!.path);
       }
 
-      await ApiService.createPost(
+      await PostService.createPost(
         categoryId: selectedCategoryId!,
         slug: slug,
         title: titleController.text.trim(),

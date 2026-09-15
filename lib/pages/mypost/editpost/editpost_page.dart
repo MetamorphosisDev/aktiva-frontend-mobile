@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../services/api_service.dart';
+import '../../../services/post_service.dart';
+import '../../../services/categories_service.dart';
 
 class EditPostPage extends StatefulWidget {
   final int postId;
@@ -68,10 +69,10 @@ class _EditPostPageState extends State<EditPostPage> {
   Future<void> loadData() async {
     try {
       // GET POST
-      final postData = await ApiService.getPostById(widget.postId);
+      final postData = await PostService.getPostById(widget.postId);
 
       // GET CATEGORY
-      final categoryData = await ApiService.getCategories();
+      final categoryData = await CategoryService.getCategories();
 
       // MASUKKAN DATA KE FORM
       titleController.text = postData['title'] ?? '';
@@ -178,7 +179,7 @@ class _EditPostPageState extends State<EditPostPage> {
       }
 
       // UPDATE POST
-      await ApiService.updatePost(
+      await PostService.updatePost(
         id: widget.postId,
         categoryId: selectedCategoryId!,
         slug: slug,

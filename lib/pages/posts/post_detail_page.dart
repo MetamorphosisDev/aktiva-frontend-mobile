@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../../services/post_service.dart';
+
 import '../../components/comments/comment_section.dart';
-import '../../services/api_service.dart';
+import '../../services/bookmarks_service.dart';
 import '../../services/token_storage.dart';
 
 class PostDetailPage extends StatefulWidget {
@@ -58,7 +60,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Future<void> getPostDetail() async {
     try {
-      final data = await ApiService.getPostById(widget.id);
+      final data = await PostService.getPostById(widget.id);
 
       if (!mounted) return;
 
@@ -81,7 +83,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   Future<void> checkBookmark() async {
     try {
-      final bookmarks = await ApiService.getBookmarks();
+      final bookmarks = await BookmarkService.getBookmarks();
 
       for (final bookmark in bookmarks) {
         if (bookmark['postId'] == widget.id) {
@@ -108,9 +110,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
     try {
       if (isBookmarked) {
-        await ApiService.deleteBookmark(widget.id);
+        await BookmarkService.deleteBookmark(widget.id);
       } else {
-        await ApiService.createBookmark(widget.id);
+        await BookmarkService.createBookmark(widget.id);
       }
 
       if (!mounted) return;

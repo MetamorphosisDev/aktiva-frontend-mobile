@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../services/api_service.dart';
+
 import '../../components/bottom_navbar.dart';
+import '../../services/profile_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -26,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // GET PROFILE
   Future<void> loadProfile() async {
     try {
-      final data = await ApiService.getProfile();
+      final data = await ProfileService.getProfile();
 
       if (!mounted) return;
 
@@ -64,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
 
     try {
-      await ApiService.updateProfile(
+      await ProfileService.updateProfile(
         name: nameController.text.trim(),
         email: emailController.text.trim(),
         phoneNumber: phoneController.text.trim(),
@@ -87,6 +88,49 @@ class _ProfilePageState extends State<ProfilePage> {
           isSaving = false;
         });
       }
+    }
+  }
+
+  // DELETE ACCOUNT
+  Future<void> deleteAccount() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: const Text('Are you sure you want to delete your account?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await ProfileService.deleteProfile();
+
+      if (!mounted) return;
+
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Gagal menghapus akun')));
     }
   }
 
@@ -124,6 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // PROFILE ICON
                   Center(
                     child: CircleAvatar(
                       radius: 45,
@@ -138,6 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 30),
 
+                  // NAME
                   const Text(
                     'Name',
                     style: TextStyle(fontWeight: FontWeight.w600),
@@ -157,6 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 18),
 
+                  // EMAIL
                   const Text(
                     'Email',
                     style: TextStyle(fontWeight: FontWeight.w600),
@@ -177,6 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 18),
 
+                  // PHONE
                   const Text(
                     'Phone Number',
                     style: TextStyle(fontWeight: FontWeight.w600),
@@ -197,6 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 25),
 
+                  // SAVE
                   SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -214,11 +263,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 15),
 
+                  // DELETE
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: deleteAccount,
                       child: const Text('Delete Account'),
                     ),
                   ),

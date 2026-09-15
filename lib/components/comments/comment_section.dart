@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/api_service.dart';
+import '../../services/comment_service.dart';
 import 'comment_item.dart';
 
 class CommentSection extends StatefulWidget {
@@ -37,7 +37,7 @@ class _CommentSectionState extends State<CommentSection> {
 
   Future<void> getComments() async {
     try {
-      final data = await ApiService.getComments(widget.postId);
+      final data = await CommentService.getComments(widget.postId);
 
       if (!mounted) return;
 
@@ -61,7 +61,7 @@ class _CommentSectionState extends State<CommentSection> {
 
     if (comment.isEmpty) return;
     try {
-      await ApiService.createComment(widget.postId, comment);
+      await CommentService.createComment(widget.postId, comment);
       commentController.clear();
       await getComments();
 
@@ -81,7 +81,7 @@ class _CommentSectionState extends State<CommentSection> {
 
   Future<void> deleteComment(int commentId) async {
     try {
-      await ApiService.deleteComment(commentId);
+      await CommentService.deleteComment(commentId);
 
       await getComments();
 

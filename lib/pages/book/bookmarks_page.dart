@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/bookmarks_service.dart';
 import 'package:mobile/components/bottom_navbar.dart';
 import 'package:mobile/pages/posts/post_detail_page.dart';
 
@@ -23,7 +23,7 @@ class _BookmarksPageState extends State<BookmarksPage> {
 
   Future<void> getBookmarks() async {
     try {
-      final data = await ApiService.getBookmarks();
+      final data = await BookmarkService.getBookmarks();
 
       setState(() {
         bookmarks = data;
