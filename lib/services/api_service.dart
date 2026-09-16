@@ -8,11 +8,9 @@ class ApiService {
   // GET JWT
   static Future<String> getToken() async {
     final token = await TokenStorage.getToken();
-
     if (token == null) {
       throw Exception('Token tidak ditemukan');
     }
-
     return token;
   }
 
@@ -26,11 +24,9 @@ class ApiService {
     );
 
     final data = jsonDecode(response.body);
-
     if (response.statusCode == 200) {
       return data['data'];
     }
-
     throw Exception(data['message'] ?? 'Gagal mengambil data');
   }
 
