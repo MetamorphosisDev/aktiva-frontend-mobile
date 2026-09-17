@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../services/post_service.dart';
 import '../../../services/categories_service.dart';
+import '../../../components/ui/app_ui.dart';
+import '../../../theme/app_theme.dart';
 
 class EditPostPage extends StatefulWidget {
   final int postId;
@@ -261,19 +263,14 @@ class _EditPostPageState extends State<EditPostPage> {
     return Container(
       width: double.infinity,
       height: 200,
-      color: const Color(0xFFEDEDED),
+      color: AppColors.imagePlaceholder,
       child: const Center(
-        child: Icon(Icons.image_outlined, size: 45, color: Colors.grey),
+        child: Icon(
+          Icons.image_outlined,
+          size: 40,
+          color: AppColors.textTertiary,
+        ),
       ),
-    );
-  }
-
-  // ================= INPUT =================
-
-  InputDecoration inputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
@@ -282,178 +279,215 @@ class _EditPostPageState extends State<EditPostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: AppColors.background,
 
       // ================= APP BAR =================
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
 
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
 
-        title: const Text(
-          'Edit Postingan',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: Text('Edit Postingan', style: AppText.title),
       ),
 
       // ================= BODY =================
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const AppLoading()
           : SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                8,
+                AppSpacing.screen,
+                AppSpacing.lg,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: AppSpacing.xl,
                 children: [
-                  // ================= COVER =================
-                  const Text(
-                    'Cover',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                  ),
+                  // ================= MEDIA =================
+                  AppFormSection(
+                    title: 'Media',
+                    description: selectedImage != null
+                        ? 'Gambar baru akan menggantikan gambar saat ini.'
+                        : 'Gambar sampul yang sedang digunakan.',
+                    children: [
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.card,
+                            ),
+                            child: imagePreview(),
+                          ),
 
-                  const SizedBox(height: 10),
+                          if (selectedImage != null)
+                            const Positioned(
+                              top: 10,
+                              left: 10,
+                              child: AppTag.accent(label: 'Gambar baru'),
+                            ),
+                        ],
+                      ),
 
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: imagePreview(),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: pickImage,
-                      icon: const Icon(Icons.image_outlined),
-                      label: const Text('Ganti Gambar'),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // ================= KATEGORI =================
-                  DropdownButtonFormField<int>(
-                    value: selectedCategoryId,
-                    decoration: inputDecoration('Kategori'),
-                    items: categories.map((category) {
-                      return DropdownMenuItem<int>(
-                        value: category['id'],
-                        child: Text(category['categoryName'] ?? ''),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedCategoryId = value;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ================= JUDUL =================
-                  TextField(
-                    controller: titleController,
-                    decoration: inputDecoration('Judul'),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ================= SLUG =================
-                  TextField(
-                    controller: slugController,
-                    decoration: inputDecoration('Slug'),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ================= RINGKASAN =================
-                  TextField(
-                    controller: summaryController,
-                    maxLines: 3,
-                    decoration: inputDecoration('Ringkasan'),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ================= ISI =================
-                  TextField(
-                    controller: contentController,
-                    maxLines: 8,
-                    decoration: inputDecoration('Isi Postingan'),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ================= SUMBER =================
-                  TextField(
-                    controller: sourceController,
-                    decoration: inputDecoration('Sumber'),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ================= LOKASI =================
-                  TextField(
-                    controller: locationController,
-                    decoration: inputDecoration('Lokasi'),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ================= STATUS =================
-                  DropdownButtonFormField<String>(
-                    value: selectedStatus,
-                    decoration: inputDecoration('Status'),
-                    items: const [
-                      DropdownMenuItem(value: 'draft', child: Text('Draft')),
-                      DropdownMenuItem(
-                        value: 'published',
-                        child: Text('Published'),
+                      AppSecondaryButton(
+                        label: 'Ganti Gambar',
+                        icon: Icons.image_outlined,
+                        height: 46,
+                        onPressed: pickImage,
                       ),
                     ],
-                    onChanged: (value) {
-                      if (value == null) {
-                        return;
-                      }
-
-                      setState(() {
-                        selectedStatus = value;
-                      });
-                    },
                   ),
 
-                  const SizedBox(height: 25),
+                  // ================= ARTICLE INFORMATION =================
+                  AppFormSection(
+                    title: 'Article information',
+                    children: [
+                      AppTextField(
+                        label: 'Judul',
+                        hint: 'Judul postingan',
+                        controller: titleController,
+                      ),
 
-                  // ================= SAVE =================
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: isSaving ? null : savePost,
-                      child: isSaving
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text(
-                              'Simpan Perubahan',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                      AppTextField(
+                        label: 'Slug',
+                        hint: 'judul-postingan',
+                        controller: slugController,
+                      ),
+
+                      AppFieldShell(
+                        label: 'Kategori',
+                        child: DropdownButtonFormField<int>(
+                          value: selectedCategoryId,
+                          isExpanded: true,
+                          decoration: AppInput.decoration(),
+                          items: categories.map((category) {
+                            return DropdownMenuItem<int>(
+                              value: category['id'],
+                              child: Text(category['categoryName'] ?? ''),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCategoryId = value;
+                            });
+                          },
+                        ),
+                      ),
+
+                      AppTextField(
+                        label: 'Ringkasan',
+                        hint: 'Ringkasan singkat postingan',
+                        controller: summaryController,
+                        maxLines: 3,
+                      ),
+                    ],
+                  ),
+
+                  // ================= CONTENT =================
+                  AppFormSection(
+                    title: 'Content',
+                    children: [
+                      AppTextField(
+                        label: 'Isi Postingan',
+                        hint: 'Tulis isi postingan di sini...',
+                        controller: contentController,
+                        maxLines: 10,
+                      ),
+                    ],
+                  ),
+
+                  // ================= SOURCE =================
+                  AppFormSection(
+                    title: 'Source',
+                    children: [
+                      AppTextField(
+                        label: 'Sumber',
+                        hint: 'Nama sumber',
+                        controller: sourceController,
+                      ),
+
+                      AppTextField(
+                        label: 'Lokasi',
+                        hint: 'Kota atau daerah',
+                        controller: locationController,
+                      ),
+                    ],
+                  ),
+
+                  // ================= PUBLISHING =================
+                  AppFormSection(
+                    title: 'Publishing',
+                    description:
+                        'Simpan sebagai draft atau terbitkan sekarang.',
+                    children: [
+                      AppFieldShell(
+                        label: 'Status',
+                        child: DropdownButtonFormField<String>(
+                          value: selectedStatus,
+                          isExpanded: true,
+                          decoration: AppInput.decoration(),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'draft',
+                              child: Text('Draft'),
                             ),
-                    ),
+                            DropdownMenuItem(
+                              value: 'published',
+                              child: Text('Published'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value == null) {
+                              return;
+                            }
+
+                            setState(() {
+                              selectedStatus = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
+
+      // ================= SAVE =================
+      bottomNavigationBar: isLoading ? null : _saveBar(),
+    );
+  }
+
+  Widget _saveBar() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.screen,
+            12,
+            AppSpacing.screen,
+            12,
+          ),
+          child: AppPrimaryButton(
+            label: 'Simpan Perubahan',
+            isLoading: isSaving,
+            onPressed: savePost,
+          ),
+        ),
+      ),
     );
   }
 }

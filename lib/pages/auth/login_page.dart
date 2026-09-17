@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/pages/auth/register_page.dart';
 import 'package:mobile/pages/posts/posts_page.dart';
+
 import '../../services/auth.service.dart';
+import '../../theme/app_theme.dart';
+import '../../components/ui/app_ui.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -66,163 +69,79 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 253, 253, 253),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.xl,
+            ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 390),
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // BRAND
-                  const Center(
-                    child: Text(
-                      'AKTIVA',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.5,
-                        color: Color(0xFF171717),
-                      ),
+                  Text(
+                    'AKTIVA',
+                    textAlign: TextAlign.center,
+                    style: AppText.label.copyWith(
+                      fontSize: 15,
+                      letterSpacing: 4,
+                      color: AppColors.primary,
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 40),
 
-                  // TITLE
-                  const Center(
-                    child: Text(
-                      'Welcome back',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF171717),
-                      ),
-                    ),
+                  // HEADLINE
+                  Text(
+                    'Welcome back',
+                    textAlign: TextAlign.center,
+                    style: AppText.display,
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
 
-                  // DESCRIPTION
-                  const Center(
-                    child: Text(
-                      'Sign in to continue reading, writing, and\nsaving stories.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.5,
-                        color: Color(0xFF737373),
-                      ),
-                    ),
+                  Text(
+                    'Sign in to continue reading, writing, and saving stories.',
+                    textAlign: TextAlign.center,
+                    style: AppText.bodySecondary,
                   ),
 
                   const SizedBox(height: 36),
 
-                  // EMAIL LABEL
-                  const Text(
-                    'Email',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF404040),
-                    ),
-                  ),
-
-                  const SizedBox(height: 7),
-
                   // EMAIL
-                  TextField(
+                  AppTextField(
+                    label: 'Email',
+                    hint: 'maye@aktiva.co',
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF222222),
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'maye@aktiva.co',
-                      hintStyle: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF737373),
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFEEEEEC),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 15,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF737373)),
-                      ),
-                    ),
+                    textInputAction: TextInputAction.next,
                   ),
 
-                  const SizedBox(height: 18),
-
-                  // PASSWORD LABEL
-                  const Text(
-                    'Password',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF404040),
-                    ),
-                  ),
-
-                  const SizedBox(height: 7),
+                  const SizedBox(height: AppSpacing.md),
 
                   // PASSWORD
-                  TextField(
+                  AppTextField(
+                    label: 'Password',
+                    hint: '••••••••',
                     controller: passwordController,
                     obscureText: hidePassword,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF222222),
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      hintStyle: const TextStyle(color: Color(0xFF737373)),
-                      filled: true,
-                      fillColor: const Color(0xFFEEEEEC),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 15,
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            hidePassword = !hidePassword;
-                          });
-                        },
-                        icon: Icon(
-                          hidePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          size: 18,
-                          color: const Color(0xFF404040),
-                        ),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFF737373)),
+                    textInputAction: TextInputAction.done,
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          hidePassword = !hidePassword;
+                        });
+                      },
+                      icon: Icon(
+                        hidePassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        size: 20,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -233,93 +152,58 @@ class _LoginPageState extends State<LoginPage> {
                     child: TextButton(
                       onPressed: () {},
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.only(top: 4, bottom: 0),
-                      ),
-                      child: const Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF222222),
+                        foregroundColor: AppColors.blue,
+                        minimumSize: Size.zero,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        textStyle: AppText.caption.copyWith(
+                          color: AppColors.blue,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                      child: const Text('Forgot password?'),
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.lg),
 
-                  // LOGIN BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF171717),
-                        foregroundColor: const Color(0xFFF7F7F5),
-                        disabledBackgroundColor: const Color(0xFF737373),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Color(0xFFF7F7F5),
-                              ),
-                            )
-                          : const Text(
-                              'Login',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                    ),
+                  // LOGIN
+                  AppPrimaryButton(
+                    label: 'Login',
+                    isLoading: isLoading,
+                    onPressed: login,
                   ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: AppSpacing.md),
 
                   // REGISTER
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'New to AKTIVA?',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF737373),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const RegisterPage(),
-                              ),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.only(left: 4),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Register',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF222222),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text('New to AKTIVA?', style: AppText.caption),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterPage(),
                             ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.blue,
+                          minimumSize: Size.zero,
+                          padding: const EdgeInsets.only(left: 6),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          textStyle: AppText.caption.copyWith(
+                            color: AppColors.blue,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ],
-                    ),
+                        child: const Text('Register'),
+                      ),
+                    ],
                   ),
                 ],
               ),

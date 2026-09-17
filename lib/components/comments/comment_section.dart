@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../services/comment_service.dart';
+import '../../theme/app_theme.dart';
+import '../ui/app_ui.dart';
 import 'comment_item.dart';
 
 class CommentSection extends StatefulWidget {
@@ -106,37 +108,94 @@ class _CommentSectionState extends State<CommentSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Comments',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        // HEADING
+        Row(
+          children: [
+            Text(
+              'Comments',
+              style: AppText.cardTitle.copyWith(fontSize: 18),
+            ),
+            if (!isLoading && comments.isNotEmpty) ...[
+              const SizedBox(width: AppSpacing.sm),
+              AppTag(label: '${comments.length}'),
+            ],
+          ],
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
+        // COMPOSER
         Row(
           children: [
             Expanded(
               child: TextField(
                 controller: commentController,
-                decoration: const InputDecoration(
-                  hintText: 'Tulis komentar...',
-                  border: OutlineInputBorder(),
+                cursorColor: AppColors.primary,
+                style: AppText.body.copyWith(color: AppColors.textPrimary),
+                decoration: AppInput.decoration(
+                  hint: 'Tulis komentar...',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
               ),
             ),
 
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
 
-            IconButton(onPressed: addComment, icon: const Icon(Icons.send)),
+            Material(
+              color: AppColors.primary,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: addComment,
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Icon(
+                    Icons.send_rounded,
+                    size: 19,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.lg),
 
         if (isLoading)
-          const Center(child: CircularProgressIndicator())
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: AppLoading(),
+          )
         else if (comments.isEmpty)
-          const Text('Belum ada komentar', style: TextStyle(color: Colors.grey))
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 20,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                Text('Belum ada komentar', style: AppText.label),
+                const SizedBox(height: 4),
+                Text(
+                  'Jadilah yang pertama membagikan pendapat.',
+                  textAlign: TextAlign.center,
+                  style: AppText.caption,
+                ),
+              ],
+            ),
+          )
         else
           Column(
             children: comments.map((comment) {

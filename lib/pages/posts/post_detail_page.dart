@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import '../../services/post_service.dart';
 
 import '../../components/comments/comment_section.dart';
+import '../../components/ui/app_ui.dart';
 import '../../services/bookmarks_service.dart';
 import '../../services/token_storage.dart';
+import '../../theme/app_theme.dart';
 
 class PostDetailPage extends StatefulWidget {
   final int id;
@@ -140,38 +142,52 @@ class _PostDetailPageState extends State<PostDetailPage> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+        backgroundColor: AppColors.background,
+        body: AppLoading(),
       );
     }
 
     if (post == null) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: Text('Post tidak ditemukan')),
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.background,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        body: const AppEmptyState(
+          icon: Icons.article_outlined,
+          title: 'Post tidak ditemukan',
+          message: 'Konten ini mungkin sudah dihapus atau tidak tersedia.',
+        ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
-            backgroundColor: Colors.white,
+            stretch: true,
+            backgroundColor: AppColors.surface,
+            surfaceTintColor: Colors.transparent,
             elevation: 0,
+            scrolledUnderElevation: 0,
+            leadingWidth: 64,
             leading: Padding(
-              padding: const EdgeInsets.all(8),
-              child: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(
-                    Icons.arrow_back_ios_new,
-                    size: 17,
-                    color: Colors.black,
-                  ),
+              padding: const EdgeInsets.only(left: 16),
+              child: Center(
+                child: _circleAction(
+                  icon: Icons.arrow_back,
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -180,23 +196,27 @@ class _PostDetailPageState extends State<PostDetailPage> {
             ),
             actions: [
               Padding(
-                padding: const EdgeInsets.all(8),
-                child: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: IconButton(
+                padding: const EdgeInsets.only(right: 16),
+                child: Center(
+                  child: _circleAction(
                     onPressed: toggleBookmark,
-                    icon: isBookmarkLoading
+                    child: isBookmarkLoading
                         ? const SizedBox(
                             width: 17,
                             height: 17,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
                           )
                         : Icon(
                             isBookmarked
                                 ? Icons.bookmark
                                 : Icons.bookmark_border,
-                            size: 21,
-                            color: Colors.black,
+                            size: 20,
+                            color: isBookmarked
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
                           ),
                   ),
                 ),
@@ -207,128 +227,118 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
           SliverToBoxAdapter(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 26, 24, 45),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                28,
+                AppSpacing.screen,
+                48,
+              ),
               decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppRadius.sheet),
                 ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F1F1),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      post!['category']?.toString().toUpperCase() ?? 'POST',
-                      style: const TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black54,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
+                  // CATEGORY
+                  AppTag.primary(
+                    label: post!['category']?.toString().toUpperCase() ?? 'POST',
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
+                  // TITLE
                   Text(
                     post!['title'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      height: 1.15,
-                      color: Colors.black,
-                    ),
+                    style: AppText.display.copyWith(fontSize: 28, height: 1.24),
                   ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 22),
 
+                  // METADATA
                   Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 17,
-                        backgroundColor: Color(0xFFF0F0F0),
-                        child: Icon(
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryLight,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
                           Icons.person_outline,
-                          size: 18,
-                          color: Colors.black54,
+                          size: 20,
+                          color: AppColors.primary,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            post!['author'] ?? 'Unknown',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              post!['author'] ?? 'Unknown',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.label,
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _getDate(),
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
+                            const SizedBox(height: 2),
+                            Text(_getDate(), style: AppText.caption),
+                          ],
+                        ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
 
+                  const AppDivider(),
+
+                  const SizedBox(height: 24),
+
+                  // SUMMARY
                   if (_hasText(post!['summary']))
                     Container(
                       padding: const EdgeInsets.only(left: 16),
                       decoration: const BoxDecoration(
                         border: Border(
-                          left: BorderSide(color: Colors.black, width: 3),
+                          left: BorderSide(color: AppColors.primary, width: 3),
                         ),
                       ),
                       child: Text(
                         post!['summary'],
-                        style: const TextStyle(
-                          fontSize: 15,
-                          height: 1.7,
+                        style: AppText.bodyLarge.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: Colors.black87,
                         ),
                       ),
                     ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 28),
 
+                  // CONTENT
                   if (_hasText(post!['content']))
                     Text(
                       post!['content'],
-                      style: const TextStyle(
-                        fontSize: 15,
-                        height: 1.9,
-                        color: Color(0xFF333333),
+                      style: AppText.bodyLarge.copyWith(
+                        color: AppColors.textPrimary,
                       ),
                     ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xl),
 
+                  // INFORMATION
                   if (_hasText(post!['location']) || _hasText(post!['source']))
                     _buildInformation(),
 
                   ..._buildGallery(),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  const AppDivider(),
+
+                  const SizedBox(height: AppSpacing.lg),
 
                   CommentSection(
                     postId: widget.id,
@@ -343,46 +353,61 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
+  /// Floating action rendered on the cover image (and on the pinned bar).
+  Widget _circleAction({
+    IconData? icon,
+    VoidCallback? onPressed,
+    Widget? child,
+  }) {
+    return Material(
+      color: AppColors.surface,
+      shape: const CircleBorder(side: BorderSide(color: AppColors.border)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onPressed,
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Center(
+            child:
+                child ??
+                Icon(icon, size: 20, color: AppColors.textPrimary),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCover() {
     if (!_hasImage(post!['coverImage'])) {
       return Container(
-        color: const Color(0xFFEDEDED),
+        color: AppColors.imagePlaceholder,
         child: const Center(
-          child: Icon(Icons.image_outlined, size: 40, color: Colors.grey),
+          child: Icon(
+            Icons.image_outlined,
+            size: 40,
+            color: AppColors.textTertiary,
+          ),
         ),
       );
     }
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.network(
-          post!['coverImage'],
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: const Color(0xFFEDEDED),
-              child: const Icon(
-                Icons.image_outlined,
-                size: 40,
-                color: Colors.grey,
-              ),
-            );
-          },
-        ),
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.15),
-                Colors.black.withOpacity(0.35),
-              ],
+    return Image.network(
+      post!['coverImage'],
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: AppColors.imagePlaceholder,
+          child: const Center(
+            child: Icon(
+              Icons.image_outlined,
+              size: 40,
+              color: AppColors.textTertiary,
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -390,12 +415,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Information',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-        ),
+        const AppSectionTitle('Article details'),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
 
         if (_hasText(post!['location']))
           _buildInfoRow(
@@ -407,7 +429,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         if (_hasText(post!['source']))
           _buildInfoRow(Icons.link, 'Source', post!['source']),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.lg),
       ],
     );
   }
@@ -418,27 +440,29 @@ class _PostDetailPageState extends State<PostDetailPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.grey),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.subtleFill,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: AppColors.textSecondary),
+          ),
 
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
 
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
-                ),
+                Text(title, style: AppText.caption),
 
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
 
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppText.body.copyWith(fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -472,19 +496,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
     if (images.isEmpty) return [];
 
     return [
-      const SizedBox(height: 25),
-
-      const Text(
-        'Gallery',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-      ),
+      const AppSectionTitle('Gallery'),
 
       const SizedBox(height: 14),
+
       ...images.map((image) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.card),
             child: Image.network(
               image.toString(),
               width: double.infinity,
@@ -497,6 +517,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
           ),
         );
       }),
+
+      const SizedBox(height: AppSpacing.sm),
     ];
   }
 
@@ -504,8 +526,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
     return Container(
       width: double.infinity,
       height: 220,
-      color: const Color(0xFFF1F1F1),
-      child: const Icon(Icons.image_outlined, size: 30, color: Colors.grey),
+      color: AppColors.imagePlaceholder,
+      child: const Icon(
+        Icons.image_outlined,
+        size: 30,
+        color: AppColors.textTertiary,
+      ),
     );
   }
 

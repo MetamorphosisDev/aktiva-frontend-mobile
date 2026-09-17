@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../services/post_service.dart';
 import '../../components/bottom_navbar.dart';
+import '../../components/ui/app_ui.dart';
+import '../../theme/app_theme.dart';
 import './post_detail_page.dart';
 
 class PostsPage extends StatefulWidget {
@@ -104,92 +106,87 @@ class _PostsPageState extends State<PostsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
 
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleSpacing: 24,
-        title: const Text(
-          'All posts',
-          style: TextStyle(
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 58,
+        titleSpacing: AppSpacing.screen,
+        title: Text(
+          'AKTIVA',
+          style: AppText.label.copyWith(
             fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
+            letterSpacing: 3.5,
+            color: AppColors.textPrimary,
           ),
         ),
       ),
 
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const AppLoading()
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // HEADER
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    4,
+                    AppSpacing.screen,
+                    0,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Ideas worth your time.',
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                          height: 1.15,
-                        ),
+                        style: AppText.display,
                       ),
 
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppSpacing.sm),
 
-                      const Text(
+                      Text(
                         'Independent stories for considered living.',
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                        style: AppText.bodySecondary,
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.lg),
 
                       // SEARCH
-                      Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F1F0),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFE0E0DE)),
+                      TextField(
+                        controller: searchController,
+                        cursorColor: AppColors.primary,
+                        style: AppText.body.copyWith(
+                          color: AppColors.textPrimary,
                         ),
-                        child: TextField(
-                          controller: searchController,
-                          style: const TextStyle(fontSize: 11),
-                          decoration: const InputDecoration(
-                            hintText: 'Search posts, people, topics',
-                            hintStyle: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              size: 16,
-                              color: Colors.black54,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 11),
+                        decoration: AppInput.decoration(
+                          hint: 'Search posts, people, topics',
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            size: 20,
+                            color: AppColors.textTertiary,
+                          ),
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 44,
+                            minHeight: 44,
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.md),
 
                       // CATEGORY
                       SizedBox(
-                        height: 28,
+                        height: 38,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: categories.length,
                           separatorBuilder: (context, index) {
-                            return const SizedBox(width: 6);
+                            return const SizedBox(width: 8);
                           },
                           itemBuilder: (context, index) {
                             final category = categories[index];
@@ -203,30 +200,27 @@ class _PostsPageState extends State<PostsPage> {
 
                                 filterPosts();
                               },
-                              child: Container(
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                alignment: Alignment.center,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 11,
-                                  vertical: 6,
+                                  horizontal: 16,
                                 ),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? Colors.black
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? Colors.black
-                                        : const Color(0xFFD8D8D6),
+                                      ? AppColors.primary
+                                      : AppColors.subtleFill,
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.pill,
                                   ),
                                 ),
                                 child: Text(
                                   category,
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w500,
+                                  style: AppText.caption.copyWith(
+                                    fontWeight: FontWeight.w600,
                                     color: isSelected
                                         ? Colors.white
-                                        : Colors.black,
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -235,7 +229,7 @@ class _PostsPageState extends State<PostsPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                     ],
                   ),
                 ),
@@ -243,152 +237,62 @@ class _PostsPageState extends State<PostsPage> {
                 // POSTS
                 Expanded(
                   child: RefreshIndicator(
+                    color: AppColors.primary,
                     onRefresh: getPosts,
                     child: filteredPosts.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'No posts found',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              AppEmptyState(
+                                icon: Icons.search_off_outlined,
+                                title: 'No posts found',
+                                message:
+                                    'Try another keyword or pick a different category.',
                               ),
-                            ),
+                            ],
                           )
-                        : GridView.builder(
-                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 0.9,
-                                ),
-                            itemCount: filteredPosts.length,
-                            itemBuilder: (context, index) {
-                              final post = filteredPosts[index];
+                        : LayoutBuilder(
+                            builder: (context, constraints) {
+                              // Card height follows the cover ratio so cards never
+                              // overflow on any screen width.
+                              const spacing = 14.0;
+                              const contentHeight = 176.0;
+                              final cardWidth =
+                                  (constraints.maxWidth -
+                                      (AppSpacing.screen * 2) -
+                                      spacing) /
+                                  2;
+                              final extent =
+                                  (cardWidth * 10 / 16) + contentHeight;
 
-                              return GestureDetector(
-                                onTap: () {
-                                  openPostDetail(post);
+                              return GridView.builder(
+                                physics:
+                                    const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(
+                                  AppSpacing.screen,
+                                  4,
+                                  AppSpacing.screen,
+                                  AppSpacing.lg,
+                                ),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: spacing,
+                                      mainAxisSpacing: 18,
+                                      mainAxisExtent: extent,
+                                    ),
+                                itemCount: filteredPosts.length,
+                                itemBuilder: (context, index) {
+                                  final post = filteredPosts[index];
+
+                                  return _PostCard(
+                                    post: post,
+                                    meta: _postMeta(post),
+                                    onTap: () {
+                                      openPostDetail(post);
+                                    },
+                                  );
                                 },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // IMAGE
-                                      ClipRRect(
-                                        borderRadius:
-                                            const BorderRadius.vertical(
-                                              top: Radius.circular(10),
-                                            ),
-                                        child: Image.network(
-                                          post['coverImage'] ?? '',
-                                          height: 130,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return Container(
-                                                  height: 130,
-                                                  width: double.infinity,
-                                                  color: const Color(
-                                                    0xFFF1F1F1,
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.image_outlined,
-                                                    color: Colors.grey,
-                                                  ),
-                                                );
-                                              },
-                                        ),
-                                      ),
-
-                                      // CONTENT
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                post['category']
-                                                        ?.toString()
-                                                        .toUpperCase() ??
-                                                    'POST',
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  fontSize: 8,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.grey,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-
-                                              const SizedBox(height: 5),
-
-                                              Text(
-                                                post['title'] ?? '',
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.black,
-                                                  height: 1.2,
-                                                ),
-                                              ),
-
-                                              const SizedBox(height: 5),
-
-                                              Text(
-                                                post['summary'] ?? '',
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  fontSize: 9,
-                                                  color: Colors.grey,
-                                                  height: 1.3,
-                                                ),
-                                              ),
-
-                                              const Spacer(),
-
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.person_outline,
-                                                    size: 11,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  const SizedBox(width: 3),
-                                                  Expanded(
-                                                    child: Text(
-                                                      _postMeta(post),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                        fontSize: 8,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               );
                             },
                           ),
@@ -416,5 +320,144 @@ class _PostsPageState extends State<PostsPage> {
     }
 
     return '$author · ${date.day}/${date.month}/${date.year}';
+  }
+}
+
+/// Editorial post card: cover first, then category, title, summary, metadata.
+class _PostCard extends StatelessWidget {
+  final dynamic post;
+  final String meta;
+  final VoidCallback onTap;
+
+  const _PostCard({
+    required this.post,
+    required this.meta,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final category = post['category']?.toString() ?? 'POST';
+
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // COVER
+              AspectRatio(
+                aspectRatio: 16 / 10,
+                child: _coverImage(post['coverImage']),
+              ),
+
+              // CONTENT
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.eyebrow.copyWith(fontSize: 10),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Text(
+                        post['title'] ?? '',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.label.copyWith(
+                          fontSize: 14.5,
+                          height: 1.32,
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Flexible(
+                        child: Text(
+                          post['summary'] ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.caption.copyWith(fontSize: 12),
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.person_outline,
+                            size: 13,
+                            color: AppColors.textTertiary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              meta,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.caption.copyWith(fontSize: 11.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _coverImage(dynamic value) {
+    final image = value?.toString() ?? '';
+
+    if (image.isEmpty) {
+      return _coverPlaceholder();
+    }
+
+    return Image.network(
+      image,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return _coverPlaceholder();
+      },
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return _coverPlaceholder();
+      },
+    );
+  }
+
+  Widget _coverPlaceholder() {
+    return Container(
+      width: double.infinity,
+      color: AppColors.imagePlaceholder,
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.image_outlined,
+        size: 26,
+        color: AppColors.textTertiary,
+      ),
+    );
   }
 }

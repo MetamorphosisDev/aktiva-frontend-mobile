@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../components/bottom_navbar.dart';
+import '../../components/ui/app_ui.dart';
 import '../../services/profile_service.dart';
+import '../../theme/app_theme.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -97,19 +99,39 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Delete Account'),
-          content: const Text('Are you sure you want to delete your account?'),
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sheet),
+          ),
+          title: Text('Delete Account', style: AppText.cardTitle),
+          content: Text(
+            'Are you sure you want to delete your account?',
+            style: AppText.bodySecondary,
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+                textStyle: AppText.label,
+              ),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.danger,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                ),
+                textStyle: AppText.label,
+              ),
               child: const Text('Delete'),
             ),
           ],
@@ -145,132 +167,130 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: AppColors.background,
 
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         elevation: 0,
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 58,
+        titleSpacing: AppSpacing.screen,
+        title: Text('Profile', style: AppText.title),
       ),
 
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const AppLoading()
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screen,
+                4,
+                AppSpacing.screen,
+                AppSpacing.xl,
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: AppSpacing.xl,
                 children: [
-                  // PROFILE ICON
-                  Center(
-                    child: CircleAvatar(
-                      radius: 45,
-                      backgroundColor: Colors.grey.shade200,
-                      child: const Icon(
-                        Icons.person_outline,
-                        size: 45,
-                        color: Colors.black54,
+                  // IDENTITY
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 84,
+                          height: 84,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primaryLight,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.person_outline,
+                            size: 40,
+                            color: AppColors.primary,
+                          ),
+                        ),
+
+                        const SizedBox(height: AppSpacing.md),
+
+                        Text(
+                          nameController.text.isEmpty
+                              ? 'Tanpa nama'
+                              : nameController.text,
+                          textAlign: TextAlign.center,
+                          style: AppText.cardTitle.copyWith(fontSize: 18),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        Text(
+                          emailController.text,
+                          textAlign: TextAlign.center,
+                          style: AppText.caption,
+                        ),
+
+                        if (phoneController.text.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            phoneController.text,
+                            textAlign: TextAlign.center,
+                            style: AppText.caption,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  // ACCOUNT DETAILS
+                  AppFormSection(
+                    title: 'Account details',
+                    description: 'Perbarui informasi akunmu di sini.',
+                    children: [
+                      AppTextField(
+                        label: 'Name',
+                        hint: 'Enter your name',
+                        controller: nameController,
                       ),
-                    ),
+
+                      AppTextField(
+                        label: 'Email',
+                        hint: 'Enter your email',
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+
+                      AppTextField(
+                        label: 'Phone Number',
+                        hint: 'Enter your phone number',
+                        controller: phoneController,
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(height: 30),
+                  // ACTIONS
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: AppSpacing.sm,
+                    children: [
+                      AppPrimaryButton(
+                        label: 'Save Changes',
+                        isLoading: isSaving,
+                        onPressed: saveProfile,
+                      ),
 
-                  // NAME
-                  const Text(
-                    'Name',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your name',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // EMAIL
-                  const Text(
-                    'Email',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your email',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // PHONE
-                  const Text(
-                    'Phone Number',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  TextField(
-                    controller: phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your phone number',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  // SAVE
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: isSaving ? null : saveProfile,
-                      child: isSaving
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Save Changes'),
-                    ),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  // DELETE
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: deleteAccount,
-                      child: const Text('Delete Account'),
-                    ),
+                      AppSecondaryButton.danger(
+                        label: 'Delete Account',
+                        icon: Icons.delete_outline,
+                        onPressed: deleteAccount,
+                      ),
+                    ],
                   ),
                 ],
               ),

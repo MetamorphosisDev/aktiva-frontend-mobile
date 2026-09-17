@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme.dart';
+
 class CommentItem extends StatelessWidget {
   final dynamic comment;
   final bool isMyComment;
@@ -26,46 +28,93 @@ class CommentItem extends StatelessWidget {
         '${date.minute.toString().padLeft(2, '0')}';
   }
 
+  String getUserName() {
+    final name = comment['userName']?.toString().trim() ?? '';
+    return name.isEmpty ? 'Unknown' : name;
+  }
+
+  String getInitial() {
+    final name = getUserName();
+    return name.substring(0, 1).toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // AVATAR
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: AppColors.primaryLight,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              getInitial(),
+              style: AppText.label.copyWith(color: AppColors.primary),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  comment['userName'] ?? 'Unknown',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        getUserName(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.label,
+                      ),
+                    ),
+
+                    if (isMyComment)
+                      IconButton(
+                        onPressed: onDelete,
+                        tooltip: 'Hapus komentar',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: AppColors.danger,
+                        ),
+                      ),
+                  ],
                 ),
 
                 const SizedBox(height: 4),
 
-                Text(comment['comment'] ?? ''),
+                Text(
+                  comment['comment'] ?? '',
+                  style: AppText.body.copyWith(color: AppColors.textPrimary),
+                ),
 
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.sm),
 
                 Text(
                   getDate(),
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: AppText.caption.copyWith(fontSize: 11.5),
                 ),
               ],
             ),
           ),
-
-          if (isMyComment)
-            IconButton(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline),
-            ),
         ],
       ),
     );

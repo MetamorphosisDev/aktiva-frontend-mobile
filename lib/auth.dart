@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'components/ui/app_ui.dart';
 import 'pages/auth/login_page.dart';
 import 'pages/posts/posts_page.dart';
 import 'services/token_storage.dart';
+import 'theme/app_theme.dart';
 
 class AuthCheck extends StatefulWidget {
   const AuthCheck({super.key});
@@ -36,6 +38,9 @@ class _AuthCheckState extends State<AuthCheck> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const Scaffold(
+      backgroundColor: AppColors.background,
+      body: AppLoading(),
+    );
   }
 }

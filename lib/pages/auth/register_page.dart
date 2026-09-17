@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mobile/pages/auth/login_page.dart';
 import 'package:mobile/pages/auth/register_password.dart';
 
+import '../../theme/app_theme.dart';
+import '../../components/ui/app_ui.dart';
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -53,214 +56,120 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-            child: Column(
-              children: [
-                const Text(
-                  'AKTIVA',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.5,
-                    color: Color(0xFF171717),
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                const Text(
-                  'Create account',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF171717),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  'Join a thoughtful community of readers\n'
-                  'and creators.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.5,
-                    color: Color(0xFF737373),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // NAMA
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Full name',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF404040),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.xl,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // BRAND
+                  Text(
+                    'AKTIVA',
+                    textAlign: TextAlign.center,
+                    style: AppText.label.copyWith(
+                      fontSize: 15,
+                      letterSpacing: 4,
+                      color: AppColors.primary,
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 7),
+                  const SizedBox(height: 40),
 
-                TextField(
-                  controller: namaController,
-                  style: const TextStyle(fontSize: 13),
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    hintText: 'Nama lengkap',
-                    filled: true,
-                    fillColor: const Color(0xFFEEEEEC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
+                  // HEADLINE
+                  Text(
+                    'Create account',
+                    textAlign: TextAlign.center,
+                    style: AppText.display,
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.sm),
 
-                // EMAIL
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Email',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF404040),
-                    ),
+                  Text(
+                    'Join a thoughtful community of readers and creators.',
+                    textAlign: TextAlign.center,
+                    style: AppText.bodySecondary,
                   ),
-                ),
 
-                const SizedBox(height: 7),
+                  const SizedBox(height: 36),
 
-                TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(fontSize: 13),
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    hintText: 'email@aktiva.co',
-                    filled: true,
-                    fillColor: const Color(0xFFEEEEEC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
+                  // NAMA
+                  AppTextField(
+                    label: 'Full name',
+                    hint: 'Nama lengkap',
+                    controller: namaController,
+                    textInputAction: TextInputAction.next,
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
-                // NOMOR TELEPON
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Phone number',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF404040),
-                    ),
+                  // EMAIL
+                  AppTextField(
+                    label: 'Email',
+                    hint: 'email@aktiva.co',
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
                   ),
-                ),
 
-                const SizedBox(height: 7),
+                  const SizedBox(height: AppSpacing.md),
 
-                TextField(
-                  controller: nomorTeleponController,
-                  keyboardType: TextInputType.phone,
-                  style: const TextStyle(fontSize: 13),
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    hintText: '08xxxxxxxxxx',
-                    filled: true,
-                    fillColor: const Color(0xFFEEEEEC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFD4D4D4)),
-                    ),
+                  // NOMOR TELEPON
+                  AppTextField(
+                    label: 'Phone number',
+                    hint: '08xxxxxxxxxx',
+                    controller: nomorTeleponController,
+                    keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.done,
                   ),
-                ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 28),
 
-                // NEXT BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
+                  // NEXT
+                  AppPrimaryButton(
+                    label: 'Continue',
                     onPressed: lanjutRegister,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF171717),
-                      foregroundColor: const Color(0xFFF7F7F5),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Continue',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ),
-                ),
 
-                const SizedBox(height: 18),
+                  const SizedBox(height: AppSpacing.md),
 
-                // LOGIN
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Already have an account?',
-                      style: TextStyle(fontSize: 11, color: Color(0xFF737373)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
+                  // LOGIN
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text('Already have an account?', style: AppText.caption),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.blue,
+                          minimumSize: Size.zero,
+                          padding: const EdgeInsets.only(left: 6),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          textStyle: AppText.caption.copyWith(
+                            color: AppColors.blue,
+                            fontWeight: FontWeight.w700,
                           ),
-                        );
-                      },
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF222222),
                         ),
+                        child: const Text('Login'),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

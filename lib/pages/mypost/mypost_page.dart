@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile/services/post_service.dart';
 
 import '../../components/bottom_navbar.dart';
-import '../../services/api_service.dart';
+import '../../components/ui/app_ui.dart';
+import '../../theme/app_theme.dart';
 
 import 'editpost/editpost_page.dart';
 import 'addpost/addpost_page.dart';
@@ -68,19 +69,39 @@ class _MyPostPageState extends State<MyPostPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Hapus Postingan'),
-          content: const Text('Yakin ingin menghapus postingan ini?'),
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sheet),
+          ),
+          title: Text('Hapus Postingan', style: AppText.cardTitle),
+          content: Text(
+            'Yakin ingin menghapus postingan ini?',
+            style: AppText.bodySecondary,
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textSecondary,
+                textStyle: AppText.label,
+              ),
               child: const Text('Batal'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.danger,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                ),
+                textStyle: AppText.label,
+              ),
               child: const Text('Hapus'),
             ),
           ],
@@ -117,186 +138,179 @@ class _MyPostPageState extends State<MyPostPage> {
 
   Widget postCard(dynamic post) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // IMAGE
-          Stack(
-            children: [
-              if (post['coverImage'] != null &&
-                  post['coverImage'].toString().isNotEmpty)
-                Image.network(
-                  post['coverImage'],
-                  width: double.infinity,
-                  height: 190,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return imagePlaceholder();
-                  },
-                )
-              else
-                imagePlaceholder(),
-
-              // MENU
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: PopupMenuButton(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(Icons.more_horiz, color: Colors.black),
-                    itemBuilder: (context) {
-                      return const [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit_outlined, size: 20),
-                              SizedBox(width: 10),
-                              Text('Edit'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline, size: 20),
-                              SizedBox(width: 10),
-                              Text('Hapus'),
-                            ],
-                          ),
-                        ),
-                      ];
+          // COVER
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: post['coverImage'] != null &&
+                    post['coverImage'].toString().isNotEmpty
+                ? Image.network(
+                    post['coverImage'],
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return imagePlaceholder();
                     },
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        editPost(post['id']);
-                      }
-
-                      if (value == 'delete') {
-                        deletePost(post['id']);
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ],
+                  )
+                : imagePlaceholder(),
           ),
 
           // CONTENT
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // CATEGORY
-                if (post['category'] != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F1F1),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      post['category'].toString().toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black54,
-                        letterSpacing: 0.7,
+                // CATEGORY + STATUS
+                Row(
+                  children: [
+                    if (post['category'] != null)
+                      Flexible(
+                        child: AppTag(
+                          label: post['category'].toString().toUpperCase(),
+                        ),
                       ),
-                    ),
-                  ),
 
-                const SizedBox(height: 12),
+                    if (post['category'] != null)
+                      const SizedBox(width: AppSpacing.xs),
+
+                    _statusTag(post['status']),
+                  ],
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
 
                 // TITLE
                 Text(
                   post['title'] ?? 'Tanpa judul',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                  ),
+                  style: AppText.cardTitle,
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
                 // SUMMARY
                 Text(
                   post['summary'] ?? post['content'] ?? '',
-                  maxLines: 3,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.6,
-                    color: Colors.black54,
-                  ),
+                  style: AppText.caption,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
                 // AUTHOR
                 Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 15,
-                      backgroundColor: Color(0xFFF0F0F0),
-                      child: Icon(
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryLight,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
                         Icons.person_outline,
-                        size: 17,
-                        color: Colors.black54,
+                        size: 16,
+                        color: AppColors.primary,
                       ),
                     ),
 
-                    const SizedBox(width: 9),
+                    const SizedBox(width: AppSpacing.sm),
 
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          post['author'] ?? 'Saya',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            post['author'] ?? 'Saya',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.label,
                           ),
-                        ),
 
-                        const SizedBox(height: 2),
+                          const SizedBox(height: 2),
 
-                        Text(
-                          getDate(post['createdAt']),
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey,
+                          Text(
+                            getDate(post['createdAt']),
+                            style: AppText.caption.copyWith(fontSize: 11.5),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
           ),
+
+          const AppDivider(),
+
+          // ACTIONS
+          Row(
+            children: [
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: () {
+                    editPost(post['id']);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: AppText.label,
+                    shape: const RoundedRectangleBorder(),
+                  ),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Edit'),
+                ),
+              ),
+
+              Container(width: 1, height: 22, color: AppColors.border),
+
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: () {
+                    deletePost(post['id']);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.danger,
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: AppText.label,
+                    shape: const RoundedRectangleBorder(),
+                  ),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('Hapus'),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
+  }
+
+  // ================= STATUS =================
+
+  Widget _statusTag(dynamic status) {
+    final value = status?.toString().toLowerCase() ?? '';
+
+    if (value == 'published') {
+      return const AppTag.primary(label: 'PUBLISHED');
+    }
+
+    return const AppTag.accent(label: 'DRAFT');
   }
 
   // ================= IMAGE =================
@@ -304,10 +318,12 @@ class _MyPostPageState extends State<MyPostPage> {
   Widget imagePlaceholder() {
     return Container(
       width: double.infinity,
-      height: 190,
-      color: const Color(0xFFEDEDED),
-      child: const Center(
-        child: Icon(Icons.image_outlined, size: 40, color: Colors.grey),
+      color: AppColors.imagePlaceholder,
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.image_outlined,
+        size: 36,
+        color: AppColors.textTertiary,
       ),
     );
   }
@@ -333,51 +349,91 @@ class _MyPostPageState extends State<MyPostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: AppColors.background,
 
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+        backgroundColor: AppColors.background,
         elevation: 0,
-        title: const Text(
-          'Postingan Saya',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 62,
+        titleSpacing: AppSpacing.screen,
+        title: Text('My Posts', style: AppText.title),
         actions: [
-          IconButton(
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddPostPage()),
-              );
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.screen),
+            child: Center(
+              child: Material(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(AppRadius.button),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddPostPage(),
+                      ),
+                    );
 
-              if (result == true) {
-                getMyPosts();
-              }
-            },
-            icon: const Icon(Icons.add, color: Colors.black),
+                    if (result == true) {
+                      getMyPosts();
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.add, size: 18, color: Colors.white),
+                        const SizedBox(width: 6),
+                        Text(
+                          'New post',
+                          style: AppText.label.copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          const SizedBox(width: 8),
         ],
       ),
+
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : posts.isEmpty
-          ? const Center(
-              child: Text(
-                'Belum ada postingan',
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                return postCard(posts[index]);
-              },
+          ? const AppLoading()
+          : RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: getMyPosts,
+              child: posts.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        AppEmptyState(
+                          icon: Icons.article_outlined,
+                          title: 'Belum ada postingan',
+                          message:
+                              'Mulai tulis cerita pertamamu lewat tombol New post.',
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.screen,
+                        4,
+                        AppSpacing.screen,
+                        AppSpacing.lg,
+                      ),
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        return postCard(posts[index]);
+                      },
+                    ),
             ),
 
       bottomNavigationBar: const BottomNavbar(currentIndex: 2),
