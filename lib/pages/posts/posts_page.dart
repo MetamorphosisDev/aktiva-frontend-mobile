@@ -105,6 +105,9 @@ class _PostsPageState extends State<PostsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Simple responsive: use screen width from MediaQuery
+    final screenWidth = MediaQuery.sizeOf(context).width;
+
     return Scaffold(
       backgroundColor: AppColors.background,
 
@@ -112,18 +115,7 @@ class _PostsPageState extends State<PostsPage> {
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        toolbarHeight: 58,
-        titleSpacing: AppSpacing.screen,
-        title: Text(
-          'AKTIVA',
-          style: AppText.label.copyWith(
-            fontSize: 14,
-            letterSpacing: 3.5,
-            color: AppColors.textPrimary,
-          ),
-        ),
+        title: Text('AKTIVA', style: AppText.title),
       ),
 
       body: isLoading
@@ -133,61 +125,54 @@ class _PostsPageState extends State<PostsPage> {
               children: [
                 // HEADER
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.screen,
-                    4,
-                    AppSpacing.screen,
-                    0,
-                  ),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Ideas worth your time.',
-                        style: AppText.display,
-                      ),
-
-                      const SizedBox(height: AppSpacing.sm),
-
-                      Text(
-                        'Independent stories for considered living.',
-                        style: AppText.bodySecondary,
-                      ),
-
-                      const SizedBox(height: AppSpacing.lg),
+                      Text('Posts', style: AppText.headline),
+                      const SizedBox(height: 8),
+                      Text('Browse all posts', style: AppText.bodySecondary),
+                      const SizedBox(height: 16),
 
                       // SEARCH
                       TextField(
                         controller: searchController,
-                        cursorColor: AppColors.primary,
-                        style: AppText.body.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                        decoration: AppInput.decoration(
-                          hint: 'Search posts, people, topics',
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            size: 20,
-                            color: AppColors.textTertiary,
+                        decoration: InputDecoration(
+                          hintText: 'Search posts...',
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.field,
+                            ),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                            ),
                           ),
-                          prefixIconConstraints: const BoxConstraints(
-                            minWidth: 44,
-                            minHeight: 44,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.field,
+                            ),
+                            borderSide: const BorderSide(
+                              color: AppColors.border,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: 16),
 
-                      // CATEGORY
+                      // CATEGORY CHIPS
                       SizedBox(
-                        height: 38,
+                        height: 36,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: categories.length,
-                          separatorBuilder: (context, index) {
-                            return const SizedBox(width: 8);
-                          },
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 8),
                           itemBuilder: (context, index) {
                             final category = categories[index];
                             final isSelected = selectedCategory == category;
@@ -197,27 +182,29 @@ class _PostsPageState extends State<PostsPage> {
                                 setState(() {
                                   selectedCategory = category;
                                 });
-
                                 filterPosts();
                               },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                alignment: Alignment.center,
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                 ),
+                                alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColors.primary
-                                      : AppColors.subtleFill,
+                                      : AppColors.surface,
                                   borderRadius: BorderRadius.circular(
                                     AppRadius.pill,
+                                  ),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.border,
                                   ),
                                 ),
                                 child: Text(
                                   category,
                                   style: AppText.caption.copyWith(
-                                    fontWeight: FontWeight.w600,
                                     color: isSelected
                                         ? Colors.white
                                         : AppColors.textPrimary,
@@ -228,13 +215,11 @@ class _PostsPageState extends State<PostsPage> {
                           },
                         ),
                       ),
-
-                      const SizedBox(height: AppSpacing.md),
                     ],
                   ),
                 ),
 
-                // POSTS
+                // POSTS GRID
                 Expanded(
                   child: RefreshIndicator(
                     color: AppColors.primary,
@@ -253,45 +238,33 @@ class _PostsPageState extends State<PostsPage> {
                           )
                         : LayoutBuilder(
                             builder: (context, constraints) {
-                              // Card height follows the cover ratio so cards never
-                              // overflow on any screen width.
-                              const spacing = 14.0;
-                              const contentHeight = 176.0;
-                              final cardWidth =
-                                  (constraints.maxWidth -
-                                      (AppSpacing.screen * 2) -
-                                      spacing) /
-                                  2;
-                              final extent =
-                                  (cardWidth * 10 / 16) + contentHeight;
+                              // RESPONSIVE AJE
+                              int crossAxisCount = 2;
+                              if (screenWidth > 1200) {
+                                crossAxisCount = 5;
+                              } else if (screenWidth > 600) {
+                                crossAxisCount = 3;
+                              }
 
                               return GridView.builder(
-                                physics:
-                                    const AlwaysScrollableScrollPhysics(),
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding: const EdgeInsets.fromLTRB(
-                                  AppSpacing.screen,
-                                  4,
-                                  AppSpacing.screen,
-                                  AppSpacing.lg,
+                                  16,
+                                  0,
+                                  16,
+                                  16,
                                 ),
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: spacing,
-                                      mainAxisSpacing: 18,
-                                      mainAxisExtent: extent,
+                                      crossAxisCount: crossAxisCount,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                      childAspectRatio: 0.75,
                                     ),
                                 itemCount: filteredPosts.length,
                                 itemBuilder: (context, index) {
                                   final post = filteredPosts[index];
-
-                                  return _PostCard(
-                                    post: post,
-                                    meta: _postMeta(post),
-                                    onTap: () {
-                                      openPostDetail(post);
-                                    },
-                                  );
+                                  return _buildGridTile(post);
                                 },
                               );
                             },
@@ -305,119 +278,54 @@ class _PostsPageState extends State<PostsPage> {
     );
   }
 
-  String _postMeta(dynamic post) {
-    final author = post['author'] ?? 'Unknown';
-    final createdAt = post['createdAt'];
+  // GRID TILE
 
-    if (createdAt == null) {
-      return author.toString();
-    }
+  Widget _buildGridTile(dynamic post) {
+    final title = post['title']?.toString() ?? '';
+    final summary = post['summary']?.toString() ?? '';
+    final category = post['category']?.toString() ?? '';
 
-    final date = DateTime.tryParse(createdAt.toString());
-
-    if (date == null) {
-      return author.toString();
-    }
-
-    return '$author · ${date.day}/${date.month}/${date.year}';
-  }
-}
-
-/// Editorial post card: cover first, then category, title, summary, metadata.
-class _PostCard extends StatelessWidget {
-  final dynamic post;
-  final String meta;
-  final VoidCallback onTap;
-
-  const _PostCard({
-    required this.post,
-    required this.meta,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final category = post['category']?.toString() ?? 'POST';
-
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
+    return GridTile(
+      child: InkWell(
+        onTap: () => openPostDetail(post),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(AppRadius.card),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // COVER
-              AspectRatio(
-                aspectRatio: 16 / 10,
-                child: _coverImage(post['coverImage']),
-              ),
-
-              // CONTENT
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.eyebrow.copyWith(fontSize: 10),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      Text(
-                        post['title'] ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.label.copyWith(
-                          fontSize: 14.5,
-                          height: 1.32,
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      Flexible(
-                        child: Text(
-                          post['summary'] ?? '',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppText.caption.copyWith(fontSize: 12),
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.person_outline,
-                            size: 13,
-                            color: AppColors.textTertiary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              meta,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppText.caption.copyWith(fontSize: 11.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              // Cover image
+              Expanded(child: _coverImage(post['coverImage'])),
+              // Text content
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category.toUpperCase(),
+                      style: AppText.eyebrow.copyWith(fontSize: 10),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      title,
+                      style: AppText.label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      summary,
+                      style: AppText.caption.copyWith(fontSize: 11),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -455,7 +363,7 @@ class _PostCard extends StatelessWidget {
       alignment: Alignment.center,
       child: const Icon(
         Icons.image_outlined,
-        size: 26,
+        size: 32,
         color: AppColors.textTertiary,
       ),
     );

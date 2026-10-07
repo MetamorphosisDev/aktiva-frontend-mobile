@@ -52,7 +52,7 @@ class _AddPostPageState extends State<AddPostPage> {
     super.dispose();
   }
 
-  // ================= GET CATEGORIES =================
+  // GET CATEGORIES
   Future<void> loadCategories() async {
     try {
       final data = await CategoryService.getCategories();
@@ -78,7 +78,7 @@ class _AddPostPageState extends State<AddPostPage> {
     }
   }
 
-  // ================= PICK IMAGE =================
+  // PICK IMAGE
 
   Future<void> pickImage() async {
     try {
@@ -94,7 +94,7 @@ class _AddPostPageState extends State<AddPostPage> {
     }
   }
 
-  // ================= CREATE POST =================
+  // CREATE POST
 
   Future<void> savePost() async {
     if (selectedCategoryId == null) {
@@ -174,7 +174,7 @@ class _AddPostPageState extends State<AddPostPage> {
     }
   }
 
-  // ================= IMAGE PREVIEW =================
+  // IMAGE PREVIEW
 
   Widget imagePreview() {
     if (selectedImage != null) {
@@ -206,14 +206,14 @@ class _AddPostPageState extends State<AddPostPage> {
       child: const Center(
         child: Icon(
           Icons.image_outlined,
-          size: 40,
+          size: 36,
           color: AppColors.textTertiary,
         ),
       ),
     );
   }
 
-  // ================= BUILD =================
+  // BUILD
 
   @override
   Widget build(BuildContext context) {
@@ -247,11 +247,10 @@ class _AddPostPageState extends State<AddPostPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: AppSpacing.xl,
                 children: [
-                  // ================= MEDIA =================
+                  // MEDIA
                   AppFormSection(
                     title: 'Media',
-                    description:
-                        'Unggah satu gambar sampul untuk postinganmu.',
+                    description: 'Unggah satu gambar sampul untuk postinganmu.',
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(AppRadius.card),
@@ -261,13 +260,13 @@ class _AddPostPageState extends State<AddPostPage> {
                       AppSecondaryButton(
                         label: 'Pilih Gambar',
                         icon: Icons.image_outlined,
-                        height: 46,
+                        height: 44,
                         onPressed: pickImage,
                       ),
                     ],
                   ),
 
-                  // ================= ARTICLE INFORMATION =================
+                  // ARTICLE INFORMATION
                   AppFormSection(
                     title: 'Article information',
                     children: [
@@ -312,7 +311,7 @@ class _AddPostPageState extends State<AddPostPage> {
                     ],
                   ),
 
-                  // ================= CONTENT =================
+                  // CONTENT
                   AppFormSection(
                     title: 'Content',
                     children: [
@@ -325,7 +324,7 @@ class _AddPostPageState extends State<AddPostPage> {
                     ],
                   ),
 
-                  // ================= SOURCE =================
+                  // SOURCE
                   AppFormSection(
                     title: 'Source',
                     children: [
@@ -343,7 +342,7 @@ class _AddPostPageState extends State<AddPostPage> {
                     ],
                   ),
 
-                  // ================= PUBLISHING =================
+                  // PUBLISHING
                   AppFormSection(
                     title: 'Publishing',
                     description:
@@ -380,7 +379,7 @@ class _AddPostPageState extends State<AddPostPage> {
               ),
             ),
 
-      // ================= SAVE =================
+      // SAVE
       bottomNavigationBar: isLoading ? null : _saveBar(),
     );
   }

@@ -18,17 +18,17 @@ class EditPostPage extends StatefulWidget {
 }
 
 class _EditPostPageState extends State<EditPostPage> {
-  // ================= DATA =================
+  // DATA
 
   Map<String, dynamic>? post;
   List<dynamic> categories = [];
 
-  // ================= STATUS =================
+  // STATUS
 
   bool isLoading = true;
   bool isSaving = false;
 
-  // ================= FORM =================
+  // FORM
 
   int? selectedCategoryId;
   String selectedStatus = 'draft';
@@ -37,7 +37,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
   final picker = ImagePicker();
 
-  // ================= CONTROLLER =================
+  // CONTROLLER
 
   final titleController = TextEditingController();
   final slugController = TextEditingController();
@@ -46,7 +46,7 @@ class _EditPostPageState extends State<EditPostPage> {
   final sourceController = TextEditingController();
   final locationController = TextEditingController();
 
-  // ================= INIT =================
+  // INIT
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _EditPostPageState extends State<EditPostPage> {
     super.dispose();
   }
 
-  // ================= LOAD DATA =================
+  // LOAD DATA
 
   Future<void> loadData() async {
     try {
@@ -110,7 +110,7 @@ class _EditPostPageState extends State<EditPostPage> {
     }
   }
 
-  // ================= PICK IMAGE =================
+  // PICK IMAGE
 
   Future<void> pickImage() async {
     try {
@@ -128,7 +128,7 @@ class _EditPostPageState extends State<EditPostPage> {
     }
   }
 
-  // ================= UPDATE =================
+  // UPDATE
 
   Future<void> savePost() async {
     // VALIDASI KATEGORI
@@ -217,7 +217,7 @@ class _EditPostPageState extends State<EditPostPage> {
     }
   }
 
-  // ================= IMAGE PREVIEW =================
+  // IMAGE PREVIEW
 
   Widget imagePreview() {
     // GAMBAR BARU
@@ -257,7 +257,7 @@ class _EditPostPageState extends State<EditPostPage> {
     return imagePlaceholder();
   }
 
-  // ================= IMAGE PLACEHOLDER =================
+  // IMAGE PLACEHOLDER
 
   Widget imagePlaceholder() {
     return Container(
@@ -274,14 +274,14 @@ class _EditPostPageState extends State<EditPostPage> {
     );
   }
 
-  // ================= BUILD =================
+  // BUILD
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
 
-      // ================= APP BAR =================
+      // APP BAR
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
@@ -298,7 +298,7 @@ class _EditPostPageState extends State<EditPostPage> {
         title: Text('Edit Postingan', style: AppText.title),
       ),
 
-      // ================= BODY =================
+      // BODY
       body: isLoading
           ? const AppLoading()
           : SingleChildScrollView(
@@ -312,7 +312,7 @@ class _EditPostPageState extends State<EditPostPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: AppSpacing.xl,
                 children: [
-                  // ================= MEDIA =================
+                  // MEDIA
                   AppFormSection(
                     title: 'Media',
                     description: selectedImage != null
@@ -329,10 +329,14 @@ class _EditPostPageState extends State<EditPostPage> {
                           ),
 
                           if (selectedImage != null)
-                            const Positioned(
+                            Positioned(
                               top: 10,
                               left: 10,
-                              child: AppTag.accent(label: 'Gambar baru'),
+                              child: AppTag(
+                                label: 'Gambar baru',
+                                background: AppColors.subtleFill,
+                                foreground: AppColors.textSecondary,
+                              ),
                             ),
                         ],
                       ),
@@ -346,7 +350,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ],
                   ),
 
-                  // ================= ARTICLE INFORMATION =================
+                  // ARTICLE INFORMATION
                   AppFormSection(
                     title: 'Article information',
                     children: [
@@ -391,7 +395,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ],
                   ),
 
-                  // ================= CONTENT =================
+                  // CONTENT
                   AppFormSection(
                     title: 'Content',
                     children: [
@@ -404,7 +408,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ],
                   ),
 
-                  // ================= SOURCE =================
+                  // SOURCE
                   AppFormSection(
                     title: 'Source',
                     children: [
@@ -422,7 +426,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ],
                   ),
 
-                  // ================= PUBLISHING =================
+                  // PUBLISHING
                   AppFormSection(
                     title: 'Publishing',
                     description:
@@ -461,7 +465,7 @@ class _EditPostPageState extends State<EditPostPage> {
               ),
             ),
 
-      // ================= SAVE =================
+      // SAVE
       bottomNavigationBar: isLoading ? null : _saveBar(),
     );
   }

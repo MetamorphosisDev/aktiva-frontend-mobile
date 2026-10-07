@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
 
-/// Primary call-to-action. Full width, 52px tall, primary green.
+/// Primary call-to-action. Full width, basic style.
 class AppPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -16,7 +16,7 @@ class AppPrimaryButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.icon,
-    this.height = 52,
+    this.height = 48,
   });
 
   @override
@@ -30,14 +30,14 @@ class AppPrimaryButton extends StatelessWidget {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           disabledBackgroundColor: AppColors.primaryDisabled,
-          disabledForegroundColor: Colors.white,
+          disabledForegroundColor: Colors.white70,
           elevation: 0,
           shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.button),
           ),
-          textStyle: AppText.label.copyWith(fontSize: 14.5),
+          textStyle: AppText.label.copyWith(fontSize: 14),
         ),
         child: isLoading
             ? const SizedBox(
@@ -70,7 +70,7 @@ class AppPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Secondary action: soft blue fill with navy text.
+/// Secondary action: outlined button
 class AppSecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -85,10 +85,10 @@ class AppSecondaryButton extends StatelessWidget {
     required this.label,
     this.onPressed,
     this.icon,
-    this.height = 48,
-    this.background = AppColors.primaryLight,
+    this.height = 44,
+    this.background = AppColors.surface,
     this.foreground = AppColors.primary,
-    this.borderColor = Colors.transparent,
+    this.borderColor = AppColors.border,
   });
 
   /// Restrained destructive variant used for delete actions.
@@ -97,10 +97,10 @@ class AppSecondaryButton extends StatelessWidget {
     required this.label,
     this.onPressed,
     this.icon,
-    this.height = 48,
+    this.height = 44,
   }) : background = AppColors.surface,
        foreground = AppColors.danger,
-       borderColor = const Color(0xFFF3C9C3);
+       borderColor = AppColors.border;
 
   @override
   Widget build(BuildContext context) {
@@ -113,8 +113,8 @@ class AppSecondaryButton extends StatelessWidget {
           backgroundColor: background,
           foregroundColor: foreground,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          side: BorderSide(color: borderColor),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          side: BorderSide(color: borderColor, width: 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.button),
           ),
@@ -195,7 +195,7 @@ class AppTextField extends StatelessWidget {
   }
 }
 
-/// Uppercase section label, e.g. "ARTICLE INFORMATION".
+/// Uppercase section label
 class AppSectionTitle extends StatelessWidget {
   final String title;
 
@@ -261,7 +261,7 @@ class AppFieldShell extends StatelessWidget {
   }
 }
 
-/// Small pill used for categories and statuses.
+/// Simple tag used for categories and statuses.
 class AppTag extends StatelessWidget {
   final String label;
   final Color background;
@@ -287,18 +287,14 @@ class AppTag extends StatelessWidget {
     : background = AppColors.dangerLight,
       foreground = AppColors.danger;
 
-  /// Tiny warm accent badge (drafts, small highlights).
-  const AppTag.accent({super.key, required this.label, this.fontSize = 11})
-    : background = AppColors.accentLight,
-      foreground = AppColors.accentDark;
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: AppColors.border),
       ),
       child: Text(
         label,
@@ -307,7 +303,7 @@ class AppTag extends StatelessWidget {
         style: AppText.eyebrow.copyWith(
           color: foreground,
           fontSize: fontSize,
-          letterSpacing: 0.6,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -318,7 +314,7 @@ class AppTag extends StatelessWidget {
 class AppLoading extends StatelessWidget {
   final double size;
 
-  const AppLoading({super.key, this.size = 26});
+  const AppLoading({super.key, this.size = 24});
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +323,7 @@ class AppLoading extends StatelessWidget {
         width: size,
         height: size,
         child: const CircularProgressIndicator(
-          strokeWidth: 2.4,
+          strokeWidth: 2,
           color: AppColors.primary,
         ),
       ),
@@ -353,24 +349,16 @@ class AppEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 56),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryLight,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 30, color: AppColors.primary),
-          ),
+          Icon(icon, size: 48, color: AppColors.textTertiary),
           const SizedBox(height: AppSpacing.md),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: AppText.cardTitle.copyWith(fontSize: 18),
+            style: AppText.cardTitle.copyWith(fontSize: 16),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
@@ -386,7 +374,7 @@ class AppEmptyState extends StatelessWidget {
                 foregroundColor: AppColors.primary,
                 textStyle: AppText.label,
               ),
-              child: const Text('Coba lagi'),
+              child: const Text('Retry'),
             ),
           ],
         ],
@@ -403,36 +391,24 @@ class AppErrorState extends StatelessWidget {
 
   const AppErrorState({
     super.key,
-    this.title = 'Terjadi kesalahan',
-    this.message = 'Konten tidak dapat dimuat saat ini.',
+    this.title = 'Error',
+    this.message = 'Content could not be loaded.',
     this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 56),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: const BoxDecoration(
-              color: AppColors.dangerLight,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.cloud_off_outlined,
-              size: 30,
-              color: AppColors.danger,
-            ),
-          ),
+          Icon(Icons.error_outline, size: 48, color: AppColors.textTertiary),
           const SizedBox(height: AppSpacing.md),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: AppText.cardTitle.copyWith(fontSize: 18),
+            style: AppText.cardTitle.copyWith(fontSize: 16),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
@@ -448,7 +424,7 @@ class AppErrorState extends StatelessWidget {
                 foregroundColor: AppColors.primary,
                 textStyle: AppText.label,
               ),
-              child: const Text('Coba lagi'),
+              child: const Text('Retry'),
             ),
           ],
         ],

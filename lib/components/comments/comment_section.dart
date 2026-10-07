@@ -130,37 +130,40 @@ class _CommentSectionState extends State<CommentSection> {
             Expanded(
               child: TextField(
                 controller: commentController,
-                cursorColor: AppColors.primary,
-                style: AppText.body.copyWith(color: AppColors.textPrimary),
-                decoration: AppInput.decoration(
-                  hint: 'Tulis komentar...',
+                style: AppText.body,
+                decoration: InputDecoration(
+                  hintText: 'Tulis komentar...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.field),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.field),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 14,
+                    vertical: 12,
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: 8),
 
-            Material(
-              color: AppColors.primary,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: addComment,
-                child: const SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Icon(
-                    Icons.send_rounded,
-                    size: 19,
-                    color: Colors.white,
-                  ),
+            ElevatedButton(
+              onPressed: addComment,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.button),
                 ),
               ),
+              child: const Icon(Icons.send, size: 18),
             ),
           ],
         ),

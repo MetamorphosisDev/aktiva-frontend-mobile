@@ -74,13 +74,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     'AKTIVA',
                     textAlign: TextAlign.center,
                     style: AppText.label.copyWith(
-                      fontSize: 15,
-                      letterSpacing: 4,
-                      color: AppColors.primary,
+                      fontSize: 14,
+                      letterSpacing: 2,
+                      color: AppColors.textPrimary,
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
                   // HEADLINE
                   Text(
@@ -92,12 +92,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: AppSpacing.sm),
 
                   Text(
-                    'Join a thoughtful community of readers and creators.',
+                    'Join to start reading and writing',
                     textAlign: TextAlign.center,
                     style: AppText.bodySecondary,
                   ),
 
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 32),
 
                   // NAMA
                   AppTextField(
@@ -112,7 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // EMAIL
                   AppTextField(
                     label: 'Email',
-                    hint: 'email@aktiva.co',
+                    hint: 'email@example.com',
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
@@ -140,9 +140,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: AppSpacing.md),
 
                   // LOGIN
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Already have an account?', style: AppText.caption),
                       TextButton(
@@ -155,13 +154,13 @@ class _RegisterPageState extends State<RegisterPage> {
                           );
                         },
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.blue,
+                          foregroundColor: AppColors.primary,
                           minimumSize: Size.zero,
                           padding: const EdgeInsets.only(left: 6),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           textStyle: AppText.caption.copyWith(
-                            color: AppColors.blue,
-                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         child: const Text('Login'),

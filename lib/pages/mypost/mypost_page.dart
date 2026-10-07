@@ -26,7 +26,7 @@ class _MyPostPageState extends State<MyPostPage> {
     getMyPosts();
   }
 
-  // ================= GET POSTS =================
+  // GET POSTS
 
   Future<void> getMyPosts() async {
     try {
@@ -45,7 +45,7 @@ class _MyPostPageState extends State<MyPostPage> {
     }
   }
 
-  // ================= EDIT =================
+  // EDIT
 
   Future<void> editPost(int postId) async {
     final result = await Navigator.push(
@@ -62,46 +62,26 @@ class _MyPostPageState extends State<MyPostPage> {
     }
   }
 
-  // ================= DELETE =================
+  // DELETE
 
   Future<void> deletePost(int postId) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.sheet),
-          ),
-          title: Text('Hapus Postingan', style: AppText.cardTitle),
-          content: Text(
-            'Yakin ingin menghapus postingan ini?',
-            style: AppText.bodySecondary,
-          ),
+          title: const Text('Hapus Postingan'),
+          content: const Text('Yakin ingin menghapus postingan ini?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                textStyle: AppText.label,
-              ),
               child: const Text('Batal'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.danger,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button),
-                ),
-                textStyle: AppText.label,
-              ),
               child: const Text('Hapus'),
             ),
           ],
@@ -134,174 +114,7 @@ class _MyPostPageState extends State<MyPostPage> {
     }
   }
 
-  // ================= POST CARD =================
-
-  Widget postCard(dynamic post) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // COVER
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: post['coverImage'] != null &&
-                    post['coverImage'].toString().isNotEmpty
-                ? Image.network(
-                    post['coverImage'],
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return imagePlaceholder();
-                    },
-                  )
-                : imagePlaceholder(),
-          ),
-
-          // CONTENT
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // CATEGORY + STATUS
-                Row(
-                  children: [
-                    if (post['category'] != null)
-                      Flexible(
-                        child: AppTag(
-                          label: post['category'].toString().toUpperCase(),
-                        ),
-                      ),
-
-                    if (post['category'] != null)
-                      const SizedBox(width: AppSpacing.xs),
-
-                    _statusTag(post['status']),
-                  ],
-                ),
-
-                const SizedBox(height: AppSpacing.sm),
-
-                // TITLE
-                Text(
-                  post['title'] ?? 'Tanpa judul',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.cardTitle,
-                ),
-
-                const SizedBox(height: 8),
-
-                // SUMMARY
-                Text(
-                  post['summary'] ?? post['content'] ?? '',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppText.caption,
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                // AUTHOR
-                Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryLight,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.person_outline,
-                        size: 16,
-                        color: AppColors.primary,
-                      ),
-                    ),
-
-                    const SizedBox(width: AppSpacing.sm),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            post['author'] ?? 'Saya',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppText.label,
-                          ),
-
-                          const SizedBox(height: 2),
-
-                          Text(
-                            getDate(post['createdAt']),
-                            style: AppText.caption.copyWith(fontSize: 11.5),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const AppDivider(),
-
-          // ACTIONS
-          Row(
-            children: [
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: () {
-                    editPost(post['id']);
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    minimumSize: Size.zero,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    textStyle: AppText.label,
-                    shape: const RoundedRectangleBorder(),
-                  ),
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text('Edit'),
-                ),
-              ),
-
-              Container(width: 1, height: 22, color: AppColors.border),
-
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: () {
-                    deletePost(post['id']);
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.danger,
-                    minimumSize: Size.zero,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    textStyle: AppText.label,
-                    shape: const RoundedRectangleBorder(),
-                  ),
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  label: const Text('Hapus'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= STATUS =================
+  // STATUS
 
   Widget _statusTag(dynamic status) {
     final value = status?.toString().toLowerCase() ?? '';
@@ -310,25 +123,48 @@ class _MyPostPageState extends State<MyPostPage> {
       return const AppTag.primary(label: 'PUBLISHED');
     }
 
-    return const AppTag.accent(label: 'DRAFT');
+    return AppTag(label: 'DRAFT');
   }
 
-  // ================= IMAGE =================
+  // IMAGE
 
-  Widget imagePlaceholder() {
+  Widget _thumbnail(dynamic value) {
+    final image = value?.toString() ?? '';
+
+    if (image.isEmpty) {
+      return _thumbnailPlaceholder();
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.image),
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: Image.network(
+          image,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _thumbnailPlaceholder();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _thumbnailPlaceholder() {
     return Container(
-      width: double.infinity,
+      width: 48,
+      height: 48,
       color: AppColors.imagePlaceholder,
-      alignment: Alignment.center,
       child: const Icon(
         Icons.image_outlined,
-        size: 36,
+        size: 20,
         color: AppColors.textTertiary,
       ),
     );
   }
 
-  // ================= DATE =================
+  // DATE
 
   String getDate(dynamic date) {
     if (date == null) {
@@ -344,7 +180,7 @@ class _MyPostPageState extends State<MyPostPage> {
     return '${result.day}/${result.month}/${result.year}';
   }
 
-  // ================= BUILD =================
+  // BUILD
 
   @override
   Widget build(BuildContext context) {
@@ -355,51 +191,22 @@ class _MyPostPageState extends State<MyPostPage> {
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        toolbarHeight: 62,
-        titleSpacing: AppSpacing.screen,
         title: Text('My Posts', style: AppText.title),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.screen),
-            child: Center(
-              child: Material(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(AppRadius.button),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AddPostPage(),
-                      ),
-                    );
-
-                    if (result == true) {
-                      getMyPosts();
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.add, size: 18, color: Colors.white),
-                        const SizedBox(width: 6),
-                        Text(
-                          'New post',
-                          style: AppText.label.copyWith(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddPostPage(),
                 ),
-              ),
-            ),
+              );
+
+              if (result == true) {
+                getMyPosts();
+              }
+            },
           ),
         ],
       ),
@@ -417,21 +224,96 @@ class _MyPostPageState extends State<MyPostPage> {
                           icon: Icons.article_outlined,
                           title: 'Belum ada postingan',
                           message:
-                              'Mulai tulis cerita pertamamu lewat tombol New post.',
+                              'Mulai tulis cerita pertamamu lewat tombol tambah.',
                         ),
                       ],
                     )
                   : ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.screen,
-                        4,
-                        AppSpacing.screen,
-                        AppSpacing.lg,
-                      ),
+                      padding: const EdgeInsets.all(8),
                       itemCount: posts.length,
                       itemBuilder: (context, index) {
-                        return postCard(posts[index]);
+                        final post = posts[index];
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          elevation: 0,
+                          color: AppColors.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppRadius.card),
+                            side: const BorderSide(color: AppColors.border),
+                          ),
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: _thumbnail(post['coverImage']),
+                                title: Text(
+                                  post['title'] ?? 'Tanpa judul',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.label,
+                                ),
+                                subtitle: Text(
+                                  '${post['category'] ?? ''} · ${getDate(post['createdAt'])}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.caption,
+                                ),
+                                trailing: _statusTag(post['status']),
+                                onTap: () {
+                                  editPost(post['id']);
+                                },
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                              ),
+                              const Divider(height: 1),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextButton.icon(
+                                      onPressed: () {
+                                        editPost(post['id']);
+                                      },
+                                      icon: const Icon(Icons.edit_outlined,
+                                          size: 16),
+                                      label: const Text('Edit'),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            AppColors.textPrimary,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 24,
+                                    color: AppColors.border,
+                                  ),
+                                  Expanded(
+                                    child: TextButton.icon(
+                                      onPressed: () {
+                                        deletePost(post['id']);
+                                      },
+                                      icon: const Icon(Icons.delete_outline,
+                                          size: 16),
+                                      label: const Text('Hapus'),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            AppColors.textSecondary,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
                       },
                     ),
             ),

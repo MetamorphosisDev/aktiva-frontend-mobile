@@ -164,8 +164,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
         ),
         body: const AppEmptyState(
           icon: Icons.article_outlined,
-          title: 'Post tidak ditemukan',
-          message: 'Konten ini mungkin sudah dihapus atau tidak tersedia.',
+          title: 'Post not found',
+          message: 'This content may have been deleted or is unavailable.',
         ),
       );
     }
@@ -175,16 +175,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: 220,
             pinned: true,
-            stretch: true,
             backgroundColor: AppColors.surface,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
-            scrolledUnderElevation: 0,
-            leadingWidth: 64,
+            scrolledUnderElevation: 1,
+            leadingWidth: 56,
             leading: Padding(
-              padding: const EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.only(left: 8),
               child: Center(
                 child: _circleAction(
                   icon: Icons.arrow_back,
@@ -196,7 +195,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             ),
             actions: [
               Padding(
-                padding: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.only(right: 8),
                 child: Center(
                   child: _circleAction(
                     onPressed: toggleBookmark,
@@ -229,9 +228,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
             child: Container(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.screen,
-                28,
+                24,
                 AppSpacing.screen,
-                48,
+                40,
               ),
               decoration: const BoxDecoration(
                 color: AppColors.surface,
@@ -252,25 +251,26 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   // TITLE
                   Text(
                     post!['title'] ?? '',
-                    style: AppText.display.copyWith(fontSize: 28, height: 1.24),
+                    style: AppText.display.copyWith(fontSize: 24, height: 1.2),
                   ),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
 
                   // METADATA
                   Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryLight,
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: AppColors.subtleFill,
                           shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: const Icon(
                           Icons.person_outline,
-                          size: 20,
-                          color: AppColors.primary,
+                          size: 18,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -301,10 +301,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   // SUMMARY
                   if (_hasText(post!['summary']))
                     Container(
-                      padding: const EdgeInsets.only(left: 16),
+                      padding: const EdgeInsets.only(left: 12),
                       decoration: const BoxDecoration(
                         border: Border(
-                          left: BorderSide(color: AppColors.primary, width: 3),
+                          left: BorderSide(color: AppColors.primary, width: 2),
                         ),
                       ),
                       child: Text(
@@ -315,7 +315,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       ),
                     ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
 
                   // CONTENT
                   if (_hasText(post!['content']))
@@ -367,12 +367,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
         customBorder: const CircleBorder(),
         onTap: onPressed,
         child: SizedBox(
-          width: 40,
-          height: 40,
+          width: 36,
+          height: 36,
           child: Center(
             child:
                 child ??
-                Icon(icon, size: 20, color: AppColors.textPrimary),
+                Icon(icon, size: 18, color: AppColors.textPrimary),
           ),
         ),
       ),
@@ -386,7 +386,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         child: const Center(
           child: Icon(
             Icons.image_outlined,
-            size: 40,
+            size: 36,
             color: AppColors.textTertiary,
           ),
         ),
@@ -402,7 +402,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           child: const Center(
             child: Icon(
               Icons.image_outlined,
-              size: 40,
+              size: 36,
               color: AppColors.textTertiary,
             ),
           ),
@@ -417,7 +417,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       children: [
         const AppSectionTitle('Article details'),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
 
         if (_hasText(post!['location']))
           _buildInfoRow(
@@ -441,13 +441,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: AppColors.subtleFill,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 18, color: AppColors.textSecondary),
+            child: Icon(icon, size: 16, color: AppColors.textSecondary),
           ),
 
           const SizedBox(width: 12),
@@ -498,7 +498,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
     return [
       const AppSectionTitle('Gallery'),
 
-      const SizedBox(height: 14),
+      const SizedBox(height: 12),
 
       ...images.map((image) {
         return Padding(
@@ -508,7 +508,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             child: Image.network(
               image.toString(),
               width: double.infinity,
-              height: 220,
+              height: 200,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return _imageError();
@@ -525,11 +525,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
   Widget _imageError() {
     return Container(
       width: double.infinity,
-      height: 220,
+      height: 200,
       color: AppColors.imagePlaceholder,
       child: const Icon(
         Icons.image_outlined,
-        size: 30,
+        size: 28,
         color: AppColors.textTertiary,
       ),
     );

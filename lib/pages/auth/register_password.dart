@@ -203,13 +203,13 @@ class _RegisterPasswordPageState extends State<RegisterPasswordPage> {
                                 );
                               },
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.blue,
+                          foregroundColor: AppColors.primary,
                           minimumSize: Size.zero,
                           padding: const EdgeInsets.only(left: 6),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           textStyle: AppText.caption.copyWith(
-                            color: AppColors.blue,
-                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         child: const Text('Login'),

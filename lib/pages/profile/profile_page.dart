@@ -99,39 +99,21 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.sheet),
-          ),
-          title: Text('Delete Account', style: AppText.cardTitle),
-          content: Text(
+          title: const Text('Delete Account'),
+          content: const Text(
             'Are you sure you want to delete your account?',
-            style: AppText.bodySecondary,
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.textSecondary,
-                textStyle: AppText.label,
-              ),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.danger,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button),
-                ),
-                textStyle: AppText.label,
-              ),
               child: const Text('Delete'),
             ),
           ],
@@ -175,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        toolbarHeight: 58,
+        toolbarHeight: 56,
         titleSpacing: AppSpacing.screen,
         title: Text('Profile', style: AppText.title),
       ),
@@ -185,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
           : SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.screen,
-                4,
+                8,
                 AppSpacing.screen,
                 AppSpacing.xl,
               ),
@@ -204,27 +186,32 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       children: [
                         Container(
-                          width: 84,
-                          height: 84,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryLight,
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: AppColors.subtleFill,
                             shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.border),
                           ),
                           child: const Icon(
                             Icons.person_outline,
-                            size: 40,
-                            color: AppColors.primary,
+                            size: 36,
+                            color: AppColors.textSecondary,
                           ),
                         ),
 
                         const SizedBox(height: AppSpacing.md),
 
-                        Text(
-                          nameController.text.isEmpty
-                              ? 'Tanpa nama'
-                              : nameController.text,
-                          textAlign: TextAlign.center,
-                          style: AppText.cardTitle.copyWith(fontSize: 18),
+                        // FittedBox scales text to fit available width
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            nameController.text.isEmpty
+                                ? 'No name'
+                                : nameController.text,
+                            textAlign: TextAlign.center,
+                            style: AppText.cardTitle.copyWith(fontSize: 18),
+                          ),
                         ),
 
                         const SizedBox(height: 4),
@@ -233,6 +220,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           emailController.text,
                           textAlign: TextAlign.center,
                           style: AppText.caption,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
 
                         if (phoneController.text.isNotEmpty) ...[
@@ -250,7 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   // ACCOUNT DETAILS
                   AppFormSection(
                     title: 'Account details',
-                    description: 'Perbarui informasi akunmu di sini.',
+                    description: 'Update your account information here.',
                     children: [
                       AppTextField(
                         label: 'Name',

@@ -80,10 +80,6 @@ class _BookmarksPageState extends State<BookmarksPage> {
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.background,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        toolbarHeight: 58,
-        titleSpacing: AppSpacing.screen,
         title: Text('Bookmarks', style: AppText.title),
       ),
 
@@ -103,22 +99,14 @@ class _BookmarksPageState extends State<BookmarksPage> {
                         ),
                       ],
                     )
-                  : ListView.separated(
+                  : ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.screen,
-                        4,
-                        AppSpacing.screen,
-                        AppSpacing.lg,
-                      ),
+                      padding: const EdgeInsets.all(8),
                       itemCount: bookmarks.length,
-                      separatorBuilder: (context, index) {
-                        return const SizedBox(height: 12);
-                      },
                       itemBuilder: (context, index) {
                         final bookmark = bookmarks[index];
 
-                        return _BookmarkRow(
+                        return _BookmarkTile(
                           bookmark: bookmark,
                           date: _formatDate(bookmark['createdAt']),
                           onTap: () {
@@ -147,14 +135,14 @@ class _BookmarksPageState extends State<BookmarksPage> {
   }
 }
 
-/// Saved story row: thumbnail, category, title, metadata and remove action.
-class _BookmarkRow extends StatelessWidget {
+/// Standard ListTile-style bookmark row.
+class _BookmarkTile extends StatelessWidget {
   final dynamic bookmark;
   final String date;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
-  const _BookmarkRow({
+  const _BookmarkTile({
     required this.bookmark,
     required this.date,
     required this.onTap,
@@ -163,103 +151,42 @@ class _BookmarkRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final category = bookmark['category']?.toString() ?? 'POST';
+    final title = bookmark['title']?.toString() ?? 'No title';
+    final category = bookmark['category']?.toString() ?? '';
 
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 0,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.border),
+        side: const BorderSide(color: AppColors.border),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // THUMBNAIL
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.image),
-                  child: SizedBox(
-                    width: 84,
-                    height: 84,
-                    child: _thumbnail(bookmark['coverImage']),
-                  ),
-                ),
-
-                const SizedBox(width: 14),
-
-                // TEXT
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.eyebrow.copyWith(fontSize: 10),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      Text(
-                        bookmark['title'] ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.cardTitle.copyWith(fontSize: 14.5),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.schedule,
-                            size: 13,
-                            color: AppColors.textTertiary,
-                          ),
-                          const SizedBox(width: 5),
-                          Expanded(
-                            child: Text(
-                              date,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppText.caption.copyWith(fontSize: 11.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // REMOVE
-                const SizedBox(width: 4),
-
-                IconButton(
-                  onPressed: onRemove,
-                  tooltip: 'Hapus bookmark',
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
-                  ),
-                  icon: const Icon(
-                    Icons.bookmark_remove_outlined,
-                    size: 20,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+      child: ListTile(
+        leading: _thumbnail(bookmark['coverImage']),
+        title: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppText.label,
+        ),
+        subtitle: Text(
+          category.isEmpty ? date : '$category · $date',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppText.caption,
+        ),
+        trailing: IconButton(
+          onPressed: onRemove,
+          tooltip: 'Hapus bookmark',
+          icon: const Icon(
+            Icons.bookmark_remove_outlined,
+            size: 20,
+            color: AppColors.textSecondary,
           ),
         ),
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       ),
     );
   }
@@ -271,22 +198,30 @@ class _BookmarkRow extends StatelessWidget {
       return _thumbnailPlaceholder();
     }
 
-    return Image.network(
-      image,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return _thumbnailPlaceholder();
-      },
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.image),
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: Image.network(
+          image,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _thumbnailPlaceholder();
+          },
+        ),
+      ),
     );
   }
 
   Widget _thumbnailPlaceholder() {
     return Container(
+      width: 48,
+      height: 48,
       color: AppColors.imagePlaceholder,
-      alignment: Alignment.center,
       child: const Icon(
         Icons.image_outlined,
-        size: 22,
+        size: 20,
         color: AppColors.textTertiary,
       ),
     );
